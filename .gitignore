@@ -1,0 +1,9 @@
+node_modules/
+.turbo/
+dist/
+*.key.pem
+.env
+.env.*
+!.env.example
+.DS_Store
+.claude/settings.local.json

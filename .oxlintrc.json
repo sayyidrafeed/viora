@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": { "correctness": "error", "suspicious": "warn" },
+  "rules": {
+    "no-restricted-imports": ["error", { "patterns": [{ "group": ["**/apps/*-svc/**", "@viora/*-svc"], "message": "Service tidak boleh mengimpor kode service lain. Pakai packages/*." }] }]
+  },
+  "ignorePatterns": ["node_modules", "docs"]
+}

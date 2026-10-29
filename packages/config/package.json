@@ -1,0 +1,6 @@
+{
+  "name": "@viora/config",
+  "private": true,
+  "type": "module",
+  "exports": { "./tsconfig.base.json": "./tsconfig.base.json" }
+}
