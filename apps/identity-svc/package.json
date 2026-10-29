@@ -8,17 +8,19 @@
     "test": "bun test --timeout 60000",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun --env-file=.env src/db/migrate.ts",
-    "keys:dev": "bun scripts/dev-jwt-key.ts"
+    "keys:dev": "bun scripts/dev-jwt-key.ts",
+    "openapi": "bun scripts/openapi.ts"
   },
   "dependencies": {
+    "@better-auth/expo": "1.7.14",
     "@viora/contracts": "workspace:*",
     "@viora/service-kit": "workspace:*",
     "better-auth": "1.7.14",
-    "@better-auth/expo": "1.7.14",
     "drizzle-orm": "0.45.4",
+    "drizzle-zod": "0.8.3",
     "hono": "4.13.14",
-    "zod": "4.6.7",
-    "drizzle-zod": "0.8.3"
+    "hono-openapi": "1.5.0",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@viora/config": "workspace:*",

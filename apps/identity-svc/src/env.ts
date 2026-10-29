@@ -14,6 +14,7 @@ const shape = {
   JWT_KEY_DIR: z.string().min(1),
   JWT_ACTIVE_KID: z.string().min(1),
   KAFKA_BROKERS: z.string().transform((v) => v.split(',')),
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: z.url().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 }

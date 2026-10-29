@@ -33,7 +33,10 @@ export function meService({ db, denylist }: Deps) {
       await denylist.deny(userId)
       try {
         await db.transaction(async (tx) => {
-          const [owned] = await tx.select({ id: channel.id }).from(channel).where(eq(channel.ownerUserId, userId))
+          const [owned] = await tx
+            .select({ id: channel.id, stateVersion: channel.stateVersion })
+            .from(channel)
+            .where(eq(channel.ownerUserId, userId))
           const deleted = await tx.delete(user).where(eq(user.id, userId)).returning({ id: user.id })
           if (deleted.length === 0) throw new UserNotFoundError()
           await writeOutbox(tx, identity.schemaName, {
@@ -47,7 +50,11 @@ export function meService({ db, denylist }: Deps) {
               topic: topics.identity,
               type: 'channel.deleted',
               key: userId,
-              data: { channelId: owned.id, ownerUserId: userId } satisfies IdentityEventDataOf<'channel.deleted'>,
+              data: {
+                channelId: owned.id,
+                ownerUserId: userId,
+                stateVersion: owned.stateVersion + 1,
+              } satisfies IdentityEventDataOf<'channel.deleted'>,
             })
           }
         })

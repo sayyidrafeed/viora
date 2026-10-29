@@ -58,7 +58,13 @@ beforeAll(async () => {
     JWT_ACTIVE_KID: KID,
   })
   const auth = await createAuth({ env, db, mailer: { send: async (m) => void mails.push(m) } })
-  app = buildApp({ env, db, auth, denylist: redisDenylist(redis), publicKeys: await loadPublicKeys(keyDir) })
+  app = buildApp({
+    db,
+    denylist: redisDenylist(redis),
+    publicKeys: await loadPublicKeys(keyDir),
+    jwtIssuer: env.JWT_ISSUER,
+    authHandler: auth.handler,
+  })
 })
 
 afterAll(async () => {
@@ -234,7 +240,7 @@ describe('/v1/me', () => {
     const events = await eventsFor(userId)
     expect(events.slice(-2)).toEqual([
       { type: 'user.deleted', data: { userId, purgeComments: true } },
-      { type: 'channel.deleted', data: { channelId, ownerUserId: userId } },
+      { type: 'channel.deleted', data: { channelId, ownerUserId: userId, stateVersion: 2 } },
     ])
 
     const after = await call('/v1/me', bearer(token))
