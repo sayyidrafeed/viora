@@ -1,0 +1,6 @@
+{
+  "extends": "@viora/config/tsconfig.base.json",
+  // Kode hasil generate hey-api belum lolos exactOptionalPropertyTypes; file generate tidak boleh diedit tangan.
+  "compilerOptions": { "types": [], "lib": ["ESNext", "DOM"], "exactOptionalPropertyTypes": false },
+  "include": ["src", "openapi-ts.config.ts"]
+}

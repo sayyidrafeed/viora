@@ -1,0 +1,22 @@
+{
+  "name": "@viora/api-client",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/generated/index.ts",
+    "./client": "./src/generated/client.gen.ts",
+    "./query": "./src/generated/@tanstack/react-query.gen.ts"
+  },
+  "scripts": {
+    "generate": "openapi-ts",
+    "typecheck": "../../node_modules/.bin/tsc -p ."
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.105.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@viora/config": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}
