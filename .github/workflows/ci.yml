@@ -17,9 +17,13 @@ jobs:
     name: lint, typecheck, kontrak
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      # Node dipakai bin tooling (hey-api, Vite); versinya dari .node-version, sama dengan lokal.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
@@ -42,7 +46,11 @@ jobs:
     env:
       WEB_HOST: 0.0.0.0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      # Node dipakai bin tooling (hey-api, Vite); versinya dari .node-version, sama dengan lokal.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
