@@ -1,0 +1,25 @@
+{
+  "name": "@viora/service-kit",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./outbox": "./src/outbox.ts",
+    "./consumer": "./src/consumer.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@platformatic/kafka": "2.14.0",
+    "@viora/contracts": "workspace:*",
+    "hono": "4.13.14",
+    "zod": "4.6.7",
+    "drizzle-orm": "0.45.4",
+    "jose": "6.2.13"
+  },
+  "devDependencies": {
+    "@viora/config": "workspace:*"
+  }
+}
