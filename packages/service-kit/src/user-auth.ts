@@ -5,8 +5,33 @@ import { createMiddleware } from 'hono/factory'
 import { importSPKI, jwtVerify, type CryptoKey } from 'jose'
 import { DomainError } from './app.ts'
 
+export class UnauthorizedError extends DomainError {
+  readonly status = 401
+  readonly code = 'unauthorized'
+  constructor() {
+    super('Butuh login')
+  }
+}
+
+export class InvalidTokenError extends DomainError {
+  readonly status = 401
+  readonly code = 'invalid_token'
+  constructor() {
+    super('Token tidak valid atau kedaluwarsa')
+  }
+}
+
+export class AccountBannedError extends DomainError {
+  readonly status = 401
+  readonly code = 'account_banned'
+  constructor() {
+    super('Akun diblokir atau sudah dihapus')
+  }
+}
+
 export type UserClaims = { id: string; role: string; emailVerified: boolean }
 export type AuthVariables = { user: UserClaims | null }
+export type RequiredUser = { user: UserClaims }
 
 export async function loadPublicKeys(dir: string): Promise<Map<string, CryptoKey>> {
   const files = readdirSync(dir).filter((f) => f.endsWith('.pub.pem'))
@@ -48,24 +73,29 @@ export function userAuth({ keys, issuer, audience, denylist }: UserAuthOptions) 
     return { id: payload.sub, role: String(payload.role ?? 'user'), emailVerified: payload.ev === true }
   }
 
-  const middleware = (mode: 'required' | 'optional') =>
-    createMiddleware<{ Variables: AuthVariables }>(async (c, next) => {
-      const header = c.req.header('authorization')
-      if (!header) {
-        if (mode === 'required') throw new DomainError(401, 'unauthorized', 'Butuh login')
-        c.set('user', null)
-        return next()
-      }
-      let user: UserClaims
-      try {
-        user = await verify(header.replace(/^bearer\s+/i, ''))
-      } catch {
-        throw new DomainError(401, 'invalid_token', 'Token tidak valid atau kedaluwarsa')
-      }
-      if (await denylist.isDenied(user.id)) throw new DomainError(401, 'account_banned', 'Akun diblokir atau sudah dihapus')
-      c.set('user', user)
-      await next()
-    })
+  // Token yang ada di header selalu diverifikasi penuh; hanya ketiadaan header yang dibedakan required vs optional.
+  const authenticate = async (header: string): Promise<UserClaims> => {
+    let user: UserClaims
+    try {
+      user = await verify(header.replace(/^bearer\s+/i, ''))
+    } catch {
+      throw new InvalidTokenError()
+    }
+    if (await denylist.isDenied(user.id)) throw new AccountBannedError()
+    return user
+  }
 
-  return { required: middleware('required'), optional: middleware('optional') }
+  return {
+    required: createMiddleware<{ Variables: RequiredUser }>(async (c, next) => {
+      const header = c.req.header('authorization')
+      if (!header) throw new UnauthorizedError()
+      c.set('user', await authenticate(header))
+      await next()
+    }),
+    optional: createMiddleware<{ Variables: AuthVariables }>(async (c, next) => {
+      const header = c.req.header('authorization')
+      c.set('user', header ? await authenticate(header) : null)
+      await next()
+    }),
+  }
 }
