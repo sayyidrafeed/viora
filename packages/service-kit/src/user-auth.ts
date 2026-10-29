@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import type { RedisClient } from 'bun'
 import { createMiddleware } from 'hono/factory'
 import { importSPKI, jwtVerify, type CryptoKey } from 'jose'
-import { DomainError } from './app.ts'
+import { DomainError } from './errors.ts'
 
 export class UnauthorizedError extends DomainError {
   readonly status = 401

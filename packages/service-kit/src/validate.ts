@@ -1,6 +1,6 @@
 import { createMiddleware } from 'hono/factory'
 import type { z } from 'zod'
-import { InvalidBodyError } from './app.ts'
+import { InvalidBodyError } from './errors.ts'
 
 // Body JSON dibaca tanpa bergantung pada content-type; body kosong dianggap {}.
 export function jsonBody<S extends z.ZodType>(schema: S) {

@@ -1,5 +1,6 @@
 import type { SQL } from 'bun'
 import { Admin, MessagesStreamFallbackModes, MessagesStreamModes, type Consumer, type MessagesStream } from '@platformatic/kafka'
+import { context, propagation, SpanKind, SpanStatusCode, trace } from '@opentelemetry/api'
 import { dlqTopic, envelopeSchema, headers, retryTopic, type DataSchemas, type EventEnvelope } from '@viora/contracts'
 import { createConsumer, type KafkaMessage, type KafkaProducer } from './kafka.ts'
 import { identifier } from './outbox.ts'
@@ -107,13 +108,42 @@ export class EventConsumer {
           const wait = notBefore - Date.now()
           if (wait > 0) await Bun.sleep(wait)
         }
-        await this.process(message, stage)
+        await this.traced(message, stage)
         await message.commit()
       }
     } catch (err) {
       this.fatal = err
       this.opts.onFatal?.(err)
     }
+  }
+
+  // Span consumer memakai link ke konteks producer di header record, sesuai spesifikasi messaging OpenTelemetry (§6 Tracing).
+  private async traced(message: KafkaMessage, stage: Outcome['stage']) {
+    const producerContext = trace.getSpanContext(propagation.extract(context.active(), Object.fromEntries(message.headers)))
+    const tracer = trace.getTracer('@viora/service-kit')
+    await tracer.startActiveSpan(
+      `process ${message.topic}`,
+      {
+        kind: SpanKind.CONSUMER,
+        links: producerContext ? [{ context: producerContext }] : [],
+        attributes: {
+          'messaging.system': 'kafka',
+          'messaging.destination.name': message.topic,
+          'messaging.consumer.group.name': this.opts.group,
+          'messaging.kafka.offset': Number(message.offset),
+        },
+      },
+      async (span) => {
+        try {
+          await this.process(message, stage)
+        } catch (err) {
+          span.setStatus({ code: SpanStatusCode.ERROR })
+          throw err
+        } finally {
+          span.end()
+        }
+      },
+    )
   }
 
   // x-attempt = total percobaan handler sejauh ini, lintas tahap (§6: DLQ membawa jumlah percobaan).

@@ -1,32 +1,23 @@
+import { httpInstrumentationMiddleware } from '@hono/otel'
 import { Hono } from 'hono'
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import { z } from 'zod'
+import { deadlineMiddleware } from './deadline.ts'
+import { DomainError, InvalidBodyError } from './errors.ts'
 
-// Setiap error domain punya kelas sendiri dengan status dan kode tetap (§13); onError memetakannya ke satu bentuk error.
-export abstract class DomainError extends Error {
-  abstract readonly status: ContentfulStatusCode
-  abstract readonly code: string
-}
+export const errorBody = z.object({
+  error: z.object({ code: z.string(), message: z.string(), details: z.unknown().optional() }),
+})
 
-export class RouteNotFoundError extends DomainError {
-  readonly status = 404
-  readonly code = 'not_found'
-  constructor() {
-    super('Route tidak ada')
-  }
-}
-
-export class InvalidBodyError extends DomainError {
-  readonly status = 400
-  readonly code = 'invalid_body'
-  constructor(readonly details?: unknown) {
-    super('Body tidak valid')
-  }
-}
+// Kelas route untuk generator Kong (§6). Tanpa tanda, route dianggap `required`.
+export type AuthClass = 'public' | 'optional' | 'required'
 
 export const createRouter = <V extends Record<string, unknown>>() => new Hono<{ Variables: V }>()
 
 export function createApp(service: string) {
   const app = new Hono()
+  // Query string dibuang dari url.full: link verifikasi email dan reset password membawa token di query.
+  app.use(httpInstrumentationMiddleware({ serviceName: service, getUrlFull: (c) => new URL(c.req.url).origin + c.req.path }))
+  app.use(deadlineMiddleware)
   app.get('/healthz', (c) => c.json({ service, ok: true }))
   app.onError((err, c) => {
     if (err instanceof DomainError) {

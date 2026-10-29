@@ -2,6 +2,7 @@ import type { SQL } from 'bun'
 import { sql, type SQLWrapper } from 'drizzle-orm'
 import type { EventEnvelope } from '@viora/contracts'
 import type { KafkaProducer } from './kafka.ts'
+import { currentTraceparent } from './telemetry.ts'
 
 export const identifier = (name: string) => {
   if (!/^[a-z_][a-z0-9_]*$/.test(name)) throw new Error(`nama schema tidak valid: ${name}`)
@@ -66,6 +67,8 @@ export async function writeOutbox<T extends Record<string, unknown>>(
   event: NewEvent<T>,
 ): Promise<EventEnvelope<T>> {
   const fn = sql.raw(`${identifier(schema)}.outbox_emit`)
+  const traceparent = currentTraceparent()
+  if (traceparent) await tx.execute(sql`select set_config('viora.traceparent', ${traceparent}, true)`)
   const rows = (await tx.execute(
     sql`select ${fn}(${event.topic}, ${event.type}, ${event.key}, ${event.data}::jsonb, ${event.version ?? 1}) as envelope`,
   )) as { envelope: EventEnvelope<T> }[]
