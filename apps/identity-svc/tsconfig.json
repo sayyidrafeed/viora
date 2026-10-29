@@ -1,0 +1,9 @@
+{
+  "extends": "@viora/config/tsconfig.base.json",
+  "include": [
+    "src",
+    "test",
+    "scripts",
+    "drizzle.config.ts"
+  ]
+}
