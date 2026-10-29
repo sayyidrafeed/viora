@@ -48,8 +48,8 @@ export const identityEventData = {
   'user.profile_updated': z.object({ userId: z.string(), name: z.string(), image: z.string().nullable(), stateVersion }),
   'user.banned': z.object({
     userId: z.string(),
-    reason: z.string().nullable(),
-    expiresAt: z.iso.datetime({ offset: true }).nullable(),
+    reason: z.string().nullish(),
+    expiresAt: z.iso.datetime({ offset: true }).nullish(),
   }),
   'user.unbanned': z.object({ userId: z.string() }),
   'user.deleted': z.object({ userId: z.string(), purgeComments: z.boolean() }),
@@ -59,6 +59,7 @@ export const identityEventData = {
 } as const
 
 export type IdentityEventType = keyof typeof identityEventData
+export type IdentityEventDataOf<T extends IdentityEventType> = z.infer<(typeof identityEventData)[T]>
 export type DataSchemas = Record<string, z.ZodType<Record<string, unknown>>>
 
 export const retryTopic = (group: string, topic: string) => `retry.${group}.${topic}`
