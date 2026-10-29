@@ -1,0 +1,15 @@
+{
+  "name": "@viora/spike-kafka-bun",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test --timeout 120000",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@platformatic/kafka": "2.14.0"
+  },
+  "devDependencies": {
+    "@viora/config": "workspace:*"
+  }
+}

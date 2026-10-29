@@ -1,0 +1,16 @@
+{
+  "name": "@viora/spike-auth-keyring",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test --timeout 60000",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "better-auth": "1.7.14",
+    "jose": "6.2.13"
+  },
+  "devDependencies": {
+    "@viora/config": "workspace:*"
+  }
+}
