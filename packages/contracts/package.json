@@ -6,7 +6,9 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "schemas": "bun scripts/schemas.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "zod": "4.6.7"

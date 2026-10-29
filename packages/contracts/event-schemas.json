@@ -1,0 +1,1383 @@
+{
+  "identity.v1": {
+    "user.registered": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "image",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "user.email_verified": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+        }
+      },
+      "required": [
+        "userId",
+        "email"
+      ],
+      "additionalProperties": false
+    },
+    "user.profile_updated": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "image",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "user.banned": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expiresAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "userId"
+      ],
+      "additionalProperties": false
+    },
+    "user.unbanned": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId"
+      ],
+      "additionalProperties": false
+    },
+    "user.deleted": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "purgeComments": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "userId",
+        "purgeComments"
+      ],
+      "additionalProperties": false
+    },
+    "channel.created": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "handle": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "avatarKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "channelId",
+        "ownerUserId",
+        "handle",
+        "name",
+        "avatarKey",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "channel.updated": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "handle": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "avatarKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "channelId",
+        "ownerUserId",
+        "handle",
+        "name",
+        "avatarKey",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "channel.deleted": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "channelId",
+        "ownerUserId",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "upload.v1": {
+    "upload.started": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "uploadId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "videoId",
+        "uploadId",
+        "userId"
+      ],
+      "additionalProperties": false
+    },
+    "upload.completed": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "uploadId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "sourceKey": {
+          "type": "string"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "uploadId",
+        "userId",
+        "sourceKey",
+        "sizeBytes"
+      ],
+      "additionalProperties": false
+    },
+    "upload.cancelled": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "uploadId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "videoId",
+        "uploadId"
+      ],
+      "additionalProperties": false
+    },
+    "upload.abandoned": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "uploadId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "videoId",
+        "uploadId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "video.v1": {
+    "video.created": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationS": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "firstPublished": {
+          "type": "boolean"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "title",
+        "thumbnailKey",
+        "durationS",
+        "publishedAt",
+        "firstPublished",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.uploaded": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "sourceKey": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "upload",
+            "live"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "sourceKey",
+        "generation",
+        "source",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.ready": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationS": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "firstPublished": {
+          "type": "boolean"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "title",
+        "thumbnailKey",
+        "durationS",
+        "publishedAt",
+        "firstPublished",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.unblocked": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationS": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "firstPublished": {
+          "type": "boolean"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "title",
+        "thumbnailKey",
+        "durationS",
+        "publishedAt",
+        "firstPublished",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.metadata_updated": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationS": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "firstPublished": {
+          "type": "boolean"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "title",
+        "thumbnailKey",
+        "durationS",
+        "publishedAt",
+        "firstPublished",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.live_started": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationS": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "firstPublished": {
+          "type": "boolean"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "title",
+        "thumbnailKey",
+        "durationS",
+        "publishedAt",
+        "firstPublished",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.visibility_changed": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnailKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "durationS": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publishedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "firstPublished": {
+          "type": "boolean"
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "from": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "title",
+        "thumbnailKey",
+        "durationS",
+        "publishedAt",
+        "firstPublished",
+        "stateVersion",
+        "from"
+      ],
+      "additionalProperties": false
+    },
+    "video.blocked": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "reason",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.deleted": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "reason",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.failed": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "uploading",
+            "uploaded",
+            "processing",
+            "ready",
+            "failed",
+            "blocked",
+            "abandoned",
+            "live",
+            "deleted"
+          ]
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "public",
+            "unlisted",
+            "private"
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playable": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "channelId",
+        "ownerUserId",
+        "status",
+        "visibility",
+        "epoch",
+        "playable",
+        "reason",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    },
+    "video.access_invited": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+        },
+        "inviterName": {
+          "type": "string"
+        },
+        "videoTitle": {
+          "type": "string"
+        },
+        "registeredUserId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "videoId",
+        "email",
+        "inviterName",
+        "videoTitle"
+      ],
+      "additionalProperties": false
+    },
+    "video.access_revoked": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stateVersion": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "userId",
+        "epoch",
+        "stateVersion"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "transcode.v1": {
+    "transcode.started": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "videoId",
+        "generation"
+      ],
+      "additionalProperties": false
+    },
+    "transcode.succeeded": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "durationS": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "renditions": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "height": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "bitrateKbps": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "playlistKey": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "height",
+              "bitrateKbps",
+              "playlistKey"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "manifestKey": {
+          "type": "string"
+        },
+        "thumbnailKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "spriteKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "videoId",
+        "generation",
+        "durationS",
+        "renditions",
+        "manifestKey",
+        "thumbnailKeys",
+        "spriteKey"
+      ],
+      "additionalProperties": false
+    },
+    "transcode.failed": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string"
+        },
+        "generation": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "attempts": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "exhausted",
+            "invalid_input"
+          ]
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "videoId",
+        "generation",
+        "attempts",
+        "reason",
+        "error"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

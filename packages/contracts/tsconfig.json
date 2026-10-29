@@ -1,1 +1,8 @@
-{ "extends": "@viora/config/tsconfig.base.json", "include": ["src", "test"] }
+{
+  "extends": "@viora/config/tsconfig.base.json",
+  "include": [
+    "src",
+    "test",
+    "scripts"
+  ]
+}
