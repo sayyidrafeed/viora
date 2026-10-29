@@ -24,7 +24,13 @@ Viora punya 11 service, dua klien (web dan mobile), package bersama, infra, dan 
 
 ## Alternatif yang ditolak
 
-- Nx. Disebut di judul ADR di §17, tapi grand plan tidak mencatat alasan penolakannya. Alasan ini terbuka dan perlu diisi pemilik keputusan.
+Alasan di bawah ditulis technical architect atas delegasi pemilik proyek (2026-10-29). Keputusannya sendiri sudah dibuat di grand plan; yang ditambahkan di sini hanya alasannya.
+
+- Nx. Repo ini satu bahasa (TypeScript), satu runtime (Bun), dan setiap package sudah punya script di `package.json`. Turborepo menjalankan script itu apa adanya dengan cache dan urutan dependensi, tanpa konfigurasi per project. Nx menambahkan konsep sendiri (project config, plugin per framework, executor, daemon) yang harus dipelajari dan dirawat. Kelebihan Nx yang relevan sudah tertutup dengan cara lain:
+  - generator diganti `tools/new-service.ts` dan `tools/new-module.ts`;
+  - aturan batas modul ditegakkan oxlint (`.oxlintrc.json`);
+  - eksekusi hanya package yang berubah memakai `turbo --filter`.
+  Pertimbangkan ulang kalau repo memuat bahasa kedua (misalnya worker Rust) atau butuh distributed task execution.
 - `packages/db` bersama untuk migrasi. Ditolak di §5: migrasi tinggal di folder service pemilik schema.
 
 ## Rujukan

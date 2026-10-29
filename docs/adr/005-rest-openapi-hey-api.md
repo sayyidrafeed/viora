@@ -24,7 +24,14 @@ Klien web dan mobile memanggil API publik lewat Kong. Service saling memanggil s
 
 ## Alternatif yang ditolak
 
-- gRPC. Disebut di judul ADR di §17, tapi grand plan tidak mencatat alasan penolakannya. Alasan ini terbuka dan perlu diisi pemilik keputusan.
+Alasan di bawah ditulis technical architect atas delegasi pemilik proyek (2026-10-29). Keputusannya sendiri sudah dibuat di grand plan; yang ditambahkan di sini hanya alasannya.
+
+- gRPC. Klien publik (web, Expo) dan Kong butuh HTTP/JSON. gRPC ke browser memerlukan gRPC-Web atau proxy Connect, dan Kong OSS tidak mentranskode REST ke gRPC tanpa plugin tambahan. Memakai satu protokol untuk API publik dan internal berarti satu rantai alat:
+  - spec OpenAPI dari `hono-openapi`;
+  - konfigurasi Kong yang di-generate dari spec;
+  - klien `hey-api`;
+  - oasdiff di CI.
+  Keuntungan performa gRPC (biner, multiplexing) hampir tidak terasa karena panggilan sinkron antar-service sengaja dibatasi pada read-your-writes dan validasi kepemilikan (§6, ADR 028); sebagian besar komunikasi lewat event. Pertimbangkan ulang kalau ada panggilan internal dengan volume tinggi dan payload besar yang terbukti menjadi bottleneck di load test M7.
 
 ## Rujukan
 

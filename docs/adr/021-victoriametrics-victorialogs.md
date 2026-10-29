@@ -31,7 +31,13 @@ SLO di §3 diukur dari metrik Kong per route, histogram OTel TTFF, lag consumer,
 
 ## Alternatif yang ditolak
 
-- Prometheus dan Loki. Disebut di judul ADR di §17, tapi grand plan tidak mencatat alasan penolakannya. Alasan ini terbuka dan perlu diisi pemilik keputusan.
+Alasan di bawah ditulis technical architect atas delegasi pemilik proyek (2026-10-29). Keputusannya sendiri sudah dibuat di grand plan; yang ditambahkan di sini hanya alasannya.
+
+- Prometheus dan Loki. Observability berbagi satu node dengan semua service (anggaran 3 GB, §15), jadi pemakaian RAM dan disk per series yang menentukan.
+  - VictoriaMetrics single-node menerima scrape format Prometheus dan query PromQL (MetricsQL adalah superset-nya), jadi dashboard dan alert Grafana tetap portabel kalau suatu saat kembali ke Prometheus.
+  - VictoriaLogs adalah satu binary, sedangkan Loki skala penuh terdiri dari beberapa komponen dan sensitif terhadap kardinalitas label.
+  - Klaim efisiensi memori dan disk di atas adalah klaim vendor dan belum diukur di viora. Pengukurannya masuk anggaran RAM §15 di M3 dan M7.
+  - Bukti M0: VictoriaMetrics sudah men-scrape metrik Kong di profile `obs`.
 - Metrik OTel bawaan Kong. Hanya ada di Kong Enterprise 3.13+ (ADR 007).
 
 ## Rujukan

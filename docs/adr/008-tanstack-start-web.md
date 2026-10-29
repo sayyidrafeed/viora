@@ -25,7 +25,12 @@ Halaman tonton, channel, landing, dan search perlu SSR dengan meta Open Graph da
 
 ## Alternatif yang ditolak
 
-Grand plan tidak membahas framework web lain. Bagian ini perlu diisi kalau pemilik keputusan ingin mencatat pembanding.
+Alasan di bawah ditulis technical architect atas delegasi pemilik proyek (2026-10-29). Keputusannya sendiri sudah dibuat di grand plan; yang ditambahkan di sini hanya alasannya.
+
+- Next.js (App Router). Ditulis di sketsa stack awal sebelum grand plan, lalu diganti. Model React Server Components dan server actions-nya tumpang tindih dengan arsitektur viora, karena data selalu datang dari API service lewat Kong, bukan dari database yang diakses server web. Fitur terbaiknya juga paling mulus di platform Vercel, sedangkan viora jalan di k3s sendiri.
+- React Router v7 (framework mode). Setara untuk SSR, tapi tidak memberi router dengan search params bertipe dan integrasi Query, Form, Pacer, dan Charts dari keluarga TanStack yang dipakai di seluruh web (§12).
+- SPA Vite murni. Lebih sederhana, tapi §12 butuh SSR dan meta Open Graph untuk `/watch/:id` dan `/@:handle`.
+- Risiko yang diterima: TanStack Start lebih muda dari Next.js, dan API-nya masih bergerak (contoh: output build Vite 8 berbeda dari docs hosting lama). Versi di-pin persis di `apps/web/package.json`.
 
 ## Rujukan
 

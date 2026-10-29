@@ -23,7 +23,15 @@ Komunikasi asinkron antar-service memakai event log (§6). Pipeline metrics memb
 
 ## Alternatif yang ditolak
 
-- Apache Kafka. Disebut di judul ADR di §17, tapi grand plan tidak mencatat alasan memilih Redpanda di atas Kafka. Alasan ini terbuka dan perlu diisi pemilik keputusan.
+Alasan di bawah ditulis technical architect atas delegasi pemilik proyek (2026-10-29). Keputusannya sendiri sudah dibuat di grand plan; yang ditambahkan di sini hanya alasannya.
+
+- Apache Kafka. Kafka 4 sudah tanpa ZooKeeper (KRaft), jadi alasan lama "Kafka butuh ZooKeeper" tidak berlaku lagi. Alasan yang tersisa:
+  - Redpanda satu binary tanpa JVM, dengan batas memori dan core eksplisit (`--memory`, `--smp`), cocok dengan anggaran satu node §15 (4,5 GB).
+  - Mode `dev-container` menyala dalam hitungan detik di Compose dan CI.
+  - `rpk` mencakup admin topic, group, dan konfigurasi tanpa tooling terpisah.
+  - Schema Registry dan HTTP proxy bawaan menjadi scale path tanpa komponen baru.
+  - Risiko yang diterima: lisensi Redpanda Community bukan Apache-2.0 seperti Kafka (source-available).
+  - Karena protokolnya kompatibel Kafka (dibuktikan spike `@platformatic/kafka`, ADR 026), kembali ke Apache Kafka hanya mengganti broker, tanpa mengubah kode producer atau consumer.
 
 ## Rujukan
 
