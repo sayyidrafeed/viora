@@ -116,36 +116,41 @@ export class EventConsumer {
     }
   }
 
+  // x-attempt = total percobaan handler sejauh ini, lintas tahap (§6: DLQ membawa jumlah percobaan).
   private async process(message: KafkaMessage, stage: Outcome['stage']) {
-    const attempt = Number(message.headers.get(headers.attempt) ?? 0)
+    const priorAttempts = Number(message.headers.get(headers.attempt) ?? 0)
     let event: EventEnvelope
     try {
       event = parseEvent(message.value, this.opts.dataSchemas)
     } catch (err) {
-      return this.park(message, stage, undefined, attempt, err)
+      return this.park(message, stage, undefined, priorAttempts, err)
     }
 
     const run = await this.runWithBackoff(event, message)
-    if (run.ok) return this.report({ stage, result: 'ok', eventId: event.id, attempt })
-    if (stage === 'main' && !(run.error instanceof PermanentError)) return this.deferRetry(message, event, run.error)
-    return this.park(message, stage, event.id, attempt, run.error)
+    const attempts = priorAttempts + run.tries
+    if (run.ok) return this.report({ stage, result: 'ok', eventId: event.id, attempt: attempts })
+    if (stage === 'main' && !(run.error instanceof PermanentError)) return this.deferRetry(message, event, attempts, run.error)
+    return this.park(message, stage, event.id, attempts, run.error)
   }
 
-  private async runWithBackoff(event: EventEnvelope, message: KafkaMessage): Promise<{ ok: true } | { ok: false; error: unknown }> {
+  private async runWithBackoff(
+    event: EventEnvelope,
+    message: KafkaMessage,
+  ): Promise<{ ok: true; tries: number } | { ok: false; tries: number; error: unknown }> {
     const delays = this.opts.backoffMs ?? DEFAULT_BACKOFF_MS
     for (let i = 0; ; i++) {
       try {
         await this.opts.handle(event, message)
-        return { ok: true }
+        return { ok: true, tries: i + 1 }
       } catch (error) {
         const delay = delays[i]
-        if (error instanceof PermanentError || delay === undefined) return { ok: false, error }
+        if (error instanceof PermanentError || delay === undefined) return { ok: false, tries: i + 1, error }
         await Bun.sleep(jitter(delay))
       }
     }
   }
 
-  private async deferRetry(message: KafkaMessage, event: EventEnvelope, error: unknown) {
+  private async deferRetry(message: KafkaMessage, event: EventEnvelope, attempts: number, error: unknown) {
     await this.opts.producer.send({
       messages: [
         {
@@ -154,28 +159,28 @@ export class EventConsumer {
           value: message.value,
           headers: {
             ...this.forwardHeaders(message),
-            [headers.attempt]: '1',
+            [headers.attempt]: String(attempts),
             [headers.retryNotBefore]: String(Date.now() + (this.opts.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS)),
             [headers.error]: errorText(error),
           },
         },
       ],
     })
-    this.report({ stage: 'main', result: 'retry', eventId: event.id, attempt: 0, error: errorText(error) })
+    this.report({ stage: 'main', result: 'retry', eventId: event.id, attempt: attempts, error: errorText(error) })
   }
 
-  private async park(message: KafkaMessage, stage: Outcome['stage'], eventId: string | undefined, attempt: number, error: unknown) {
+  private async park(message: KafkaMessage, stage: Outcome['stage'], eventId: string | undefined, attempts: number, error: unknown) {
     await this.opts.producer.send({
       messages: [
         {
           topic: dlqTopic(this.opts.group, this.opts.topic),
           key: message.key,
           value: message.value,
-          headers: { ...this.forwardHeaders(message), [headers.attempt]: String(attempt), [headers.error]: errorText(error) },
+          headers: { ...this.forwardHeaders(message), [headers.attempt]: String(attempts), [headers.error]: errorText(error) },
         },
       ],
     })
-    this.report({ stage, result: 'dlq', eventId, attempt, error: errorText(error) })
+    this.report({ stage, result: 'dlq', eventId, attempt: attempts, error: errorText(error) })
   }
 
   // Header trace ikut diteruskan; asal pesan dicatat sekali dari topic utama dan dipertahankan di tahap berikutnya.

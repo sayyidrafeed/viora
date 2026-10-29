@@ -273,7 +273,7 @@ describe('consumer', () => {
     const byKey = new Map(parked.map((m) => [m.key, m]))
     expect(byKey.get('v-bad')?.headers.get(headers.error)).toContain('envelope tidak valid')
     expect(byKey.get('v-bad')?.headers.get(headers.attempt)).toBe('0')
-    expect(byKey.get('v-dlq')?.headers.get(headers.attempt)).toBe('1')
+    expect(byKey.get('v-dlq')?.headers.get(headers.attempt)).toBe('6')
     expect(byKey.get('v-dlq')?.headers.get(headers.originTopic)).toBe(topic)
     expect(byKey.get('v-dlq')?.headers.get(headers.error)).toContain('gagal sementara')
   }, 30_000)
