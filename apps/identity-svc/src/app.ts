@@ -1,5 +1,5 @@
 import type { Db } from './db/client.ts'
-import { createApp, DomainError, userAuth, type Denylist } from '@viora/service-kit'
+import { createApp, RouteNotFoundError, userAuth, type Denylist } from '@viora/service-kit'
 import type { CryptoKey } from 'jose'
 import type { Auth } from './auth/auth.ts'
 import { JWT_AUDIENCE } from './auth/auth.ts'
@@ -7,7 +7,7 @@ import type { Env } from './env.ts'
 import { meRoutes, meService } from './modules/me/index.ts'
 
 const blocked = () => {
-  throw new DomainError(404, 'not_found', 'Route tidak ada')
+  throw new RouteNotFoundError()
 }
 
 export type AppDeps = { env: Env; db: Db; auth: Auth; denylist: Denylist; publicKeys: Map<string, CryptoKey> }

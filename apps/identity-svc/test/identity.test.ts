@@ -17,9 +17,12 @@ import { meService } from '../src/modules/me/index.ts'
 import { loadEnv } from '../src/env.ts'
 import type { Mail } from '../src/mailer.ts'
 
-const baseUrl = process.env.DATABASE_URL ?? 'postgres://viora:viora-dev@127.0.0.1:15432/viora'
+// App lewat PgBouncer (transaction pooling) seperti di prod; buat database dan migrasi lewat koneksi langsung.
+const directBase = process.env.DATABASE_DIRECT_URL ?? 'postgres://viora:viora-dev@127.0.0.1:15432/viora'
+const pooledBase = process.env.DATABASE_URL ?? 'postgres://viora:viora-dev@127.0.0.1:16432/viora'
 const dbName = `identity_test_${Date.now().toString(36)}`
-const adminSql = new SQL(baseUrl)
+const adminSql = new SQL(directBase)
+const withDb = (base: string) => Object.assign(new URL(base), { pathname: `/${dbName}` }).toString()
 let sql: SQL
 let db: Db
 const redis = new RedisClient(process.env.REDIS_DURABLE_URL ?? 'redis://127.0.0.1:16379')
@@ -36,14 +39,15 @@ beforeAll(async () => {
   writeFileSync(join(keyDir, `${KID}.pub.pem`), await exportSPKI(publicKey))
 
   await adminSql.unsafe(`create database ${dbName}`)
-  const url = new URL(baseUrl)
-  url.pathname = `/${dbName}`
-  sql = new SQL(url.toString())
+  const migrator = new SQL(withDb(directBase))
+  await migrate(createDb(migrator), { migrationsFolder: join(import.meta.dir, '..', 'drizzle') })
+  await migrator.close()
+  sql = new SQL(withDb(pooledBase))
   db = createDb(sql)
-  await migrate(db, { migrationsFolder: join(import.meta.dir, '..', 'drizzle') })
 
   const env = loadEnv({
-    DATABASE_URL: url.toString(),
+    DATABASE_URL: withDb(pooledBase),
+    DATABASE_DIRECT_URL: withDb(directBase),
     REDIS_DURABLE_URL: 'redis://127.0.0.1:16379',
     KAFKA_BROKERS: '127.0.0.1:19092',
     AUTH_SECRET: 'test-secret-yang-panjangnya-lebih-dari-32',
@@ -249,7 +253,7 @@ const expoHeaders = (cookie?: string) => ({
   ...(cookie ? { cookie } : {}),
 })
 
-describe('perbaikan dari review verifier', () => {
+describe('batas akses dan penghapusan akun', () => {
   test('route bawaan Better Auth yang melewati denylist dan outbox ditolak di identity-svc', async () => {
     const { cookie } = await registerVerified('blok@viora.test')
     for (const path of ['/v1/auth/admin/list-users', '/v1/auth/admin/ban-user', '/v1/auth/delete-user', '/v1/auth/delete-user/callback']) {
@@ -282,7 +286,7 @@ describe('perbaikan dari review verifier', () => {
   })
 })
 
-describe('spike: token dari sesi Expo', () => {
+describe('token dari sesi Expo (kontrak @better-auth/expo)', () => {
   test('login dari app (tanpa header Origin) lalu /v1/auth/token dengan cookie tersimpan menghasilkan JWT', async () => {
     const { userId } = await registerVerified('expo@viora.test')
     const signIn = await call('/v1/auth/sign-in/email', {

@@ -1,14 +1,16 @@
-import type { Db } from '../../db/client.ts'
 import { eq } from 'drizzle-orm'
-import { topics } from '@viora/contracts'
-import { DomainError, writeOutbox, type Denylist } from '@viora/service-kit'
-import { channel, user } from '../../db/schema.ts'
+import { topics, type IdentityEventDataOf } from '@viora/contracts'
+import { writeOutbox, type Denylist } from '@viora/service-kit'
+import type { Db } from '../../db/client.ts'
+import { channel, identity, user } from '../../db/schema.ts'
+import { UserNotFoundError } from './me.errors.ts'
+import type { MeResponse } from './me.schema.ts'
 
 type Deps = { db: Db; denylist: Denylist }
 
 export function meService({ db, denylist }: Deps) {
   return {
-    async get(userId: string) {
+    async get(userId: string): Promise<MeResponse> {
       const [row] = await db
         .select({
           id: user.id,
@@ -22,8 +24,8 @@ export function meService({ db, denylist }: Deps) {
         .from(user)
         .leftJoin(channel, eq(channel.ownerUserId, user.id))
         .where(eq(user.id, userId))
-      if (!row) throw new DomainError(404, 'user_not_found', 'User tidak ditemukan')
-      return { ...row, channel: row.channel?.id ? row.channel : null }
+      if (!row) throw new UserNotFoundError()
+      return row
     },
 
     // Urutan §6: denylist dulu, lalu sesi dicabut (cascade) dan event ditulis di transaksi yang sama, baru TTL denylist berjalan.
@@ -33,14 +35,19 @@ export function meService({ db, denylist }: Deps) {
         await db.transaction(async (tx) => {
           const [owned] = await tx.select({ id: channel.id }).from(channel).where(eq(channel.ownerUserId, userId))
           const deleted = await tx.delete(user).where(eq(user.id, userId)).returning({ id: user.id })
-          if (deleted.length === 0) throw new DomainError(404, 'user_not_found', 'User tidak ditemukan')
-          await writeOutbox(tx, 'identity', { topic: topics.identity, type: 'user.deleted', key: userId, data: { userId, purgeComments } })
+          if (deleted.length === 0) throw new UserNotFoundError()
+          await writeOutbox(tx, identity.schemaName, {
+            topic: topics.identity,
+            type: 'user.deleted',
+            key: userId,
+            data: { userId, purgeComments } satisfies IdentityEventDataOf<'user.deleted'>,
+          })
           if (owned) {
-            await writeOutbox(tx, 'identity', {
+            await writeOutbox(tx, identity.schemaName, {
               topic: topics.identity,
               type: 'channel.deleted',
               key: userId,
-              data: { channelId: owned.id, ownerUserId: userId },
+              data: { channelId: owned.id, ownerUserId: userId } satisfies IdentityEventDataOf<'channel.deleted'>,
             })
           }
         })
