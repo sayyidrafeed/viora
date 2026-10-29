@@ -1,0 +1,6 @@
+{
+  "extends": "@viora/config/tsconfig.base.json",
+  "include": [
+    "src"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@viora/metrics-svc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "typecheck": "tsc -p .",
+    "test": "bun test --pass-with-no-tests"
+  },
+  "dependencies": {
+    "@viora/contracts": "workspace:*",
+    "@viora/service-kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@viora/config": "workspace:*"
+  }
+}
