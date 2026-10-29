@@ -5,7 +5,7 @@ import { createDb } from './db/client.ts'
 import { identity } from './db/schema.ts'
 import { createAuth } from './auth/auth.ts'
 import { loadEnv } from './env.ts'
-import { logMailer } from './mailer.ts'
+import { createMailer } from './mailer.ts'
 
 const env = loadEnv()
 startTelemetry('identity-svc', env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT)
@@ -13,7 +13,7 @@ const sql = new SQL(env.DATABASE_URL)
 const directSql = new SQL(env.DATABASE_DIRECT_URL, { max: 1 })
 const db = createDb(sql)
 const denylist = redisDenylist(new RedisClient(env.REDIS_DURABLE_URL))
-const auth = await createAuth({ env, db, mailer: logMailer })
+const auth = await createAuth({ env, db, mailer: createMailer(env) })
 const app = buildApp({
   db,
   denylist,

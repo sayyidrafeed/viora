@@ -15,6 +15,10 @@ const shape = {
   JWT_ACTIVE_KID: z.string().min(1),
   KAFKA_BROKERS: z.string().transform((v) => v.split(',')),
   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: z.url().optional(),
+  // Penyedia email (ADR 025). Kombinasinya divalidasi createMailer saat start.
+  MAIL_PROVIDER: z.enum(['log', 'resend']),
+  RESEND_API_KEY: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 }

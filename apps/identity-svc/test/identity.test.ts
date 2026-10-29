@@ -62,6 +62,7 @@ beforeAll(async () => {
     JWT_ISSUER: 'https://viora.local',
     JWT_KEY_DIR: keyDir,
     JWT_ACTIVE_KID: KID,
+    MAIL_PROVIDER: 'log',
   })
   const auth = await createAuth({ env, db, mailer: { send: async (m) => void mails.push(m) } })
   app = buildApp({
