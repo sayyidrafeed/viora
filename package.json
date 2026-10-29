@@ -6,16 +6,20 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "spikes/*"
+    "spikes/*",
+    "e2e"
   ],
   "scripts": {
     "dev:infra": "docker compose -f infra/compose/compose.yaml --profile core up -d --wait",
-    "dev:infra:down": "docker compose -f infra/compose/compose.yaml --profile core down",
+    "dev:infra:down": "docker compose -f infra/compose/compose.yaml --profile core --profile obs down",
     "new:service": "bun tools/new-service.ts",
     "lint": "oxlint .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "new:module": "bun tools/new-module.ts"
+    "new:module": "bun tools/new-module.ts",
+    "kong:config": "bun tools/kong-config.ts",
+    "dev:obs": "docker compose -f infra/compose/compose.yaml --profile core --profile obs up -d --wait",
+    "test:e2e": "cd e2e && bun test --timeout 120000"
   },
   "devDependencies": {
     "@types/bun": "1.4.4",

@@ -1,1 +1,203 @@
+# Dibuat oleh tools/kong-config.ts dari spec OpenAPI. Jangan diedit langsung.
 _format_version: "3.0"
+services:
+  - name: identity-svc
+    url: http://host.docker.internal:13001
+    routes:
+      - name: identity-svc.getV1Me
+        methods:
+          - GET
+        paths:
+          - ~/v1/me$
+        strip_path: false
+        plugins:
+          - name: jwt
+            config:
+              key_claim_name: kid
+              claims_to_verify:
+                - exp
+              header_names:
+                - authorization
+              uri_param_names: []
+              cookie_names: []
+      - name: identity-svc.deleteV1Me
+        methods:
+          - DELETE
+        paths:
+          - ~/v1/me$
+        strip_path: false
+        plugins:
+          - name: jwt
+            config:
+              key_claim_name: kid
+              claims_to_verify:
+                - exp
+              header_names:
+                - authorization
+              uri_param_names: []
+              cookie_names: []
+      - name: identity-svc.auth.post.sign-up.email
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/sign-up/email$
+        strip_path: false
+      - name: identity-svc.auth.post.sign-in.email
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/sign-in/email$
+        strip_path: false
+      - name: identity-svc.auth.post.sign-in.social
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/sign-in/social$
+        strip_path: false
+      - name: identity-svc.auth.get.callback.param
+        methods:
+          - GET
+        paths:
+          - "~/v1/auth/callback/[^/]+$"
+        strip_path: false
+      - name: identity-svc.auth.post.callback.param
+        methods:
+          - POST
+        paths:
+          - "~/v1/auth/callback/[^/]+$"
+        strip_path: false
+      - name: identity-svc.auth.post.sign-out
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/sign-out$
+        strip_path: false
+      - name: identity-svc.auth.get.get-session
+        methods:
+          - GET
+        paths:
+          - ~/v1/auth/get-session$
+        strip_path: false
+      - name: identity-svc.auth.get.token
+        methods:
+          - GET
+        paths:
+          - ~/v1/auth/token$
+        strip_path: false
+      - name: identity-svc.auth.get.jwks
+        methods:
+          - GET
+        paths:
+          - ~/v1/auth/jwks$
+        strip_path: false
+      - name: identity-svc.auth.get.verify-email
+        methods:
+          - GET
+        paths:
+          - ~/v1/auth/verify-email$
+        strip_path: false
+      - name: identity-svc.auth.post.send-verification-email
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/send-verification-email$
+        strip_path: false
+      - name: identity-svc.auth.post.request-password-reset
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/request-password-reset$
+        strip_path: false
+      - name: identity-svc.auth.get.reset-password.param
+        methods:
+          - GET
+        paths:
+          - "~/v1/auth/reset-password/[^/]+$"
+        strip_path: false
+      - name: identity-svc.auth.post.reset-password
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/reset-password$
+        strip_path: false
+      - name: identity-svc.auth.post.update-user
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/update-user$
+        strip_path: false
+      - name: identity-svc.auth.post.change-password
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/change-password$
+        strip_path: false
+      - name: identity-svc.auth.get.list-sessions
+        methods:
+          - GET
+        paths:
+          - ~/v1/auth/list-sessions$
+        strip_path: false
+      - name: identity-svc.auth.post.revoke-session
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/revoke-session$
+        strip_path: false
+      - name: identity-svc.auth.post.revoke-other-sessions
+        methods:
+          - POST
+        paths:
+          - ~/v1/auth/revoke-other-sessions$
+        strip_path: false
+      - name: identity-svc.auth.get.expo-authorization-proxy
+        methods:
+          - GET
+        paths:
+          - ~/v1/auth/expo-authorization-proxy$
+        strip_path: false
+  - name: web
+    url: http://host.docker.internal:13000
+    routes:
+      - name: web.ssr
+        paths:
+          - /
+        strip_path: false
+        preserve_host: true
+routes:
+  - name: unknown-api
+    paths:
+      - /v1/
+    strip_path: false
+    plugins:
+      - name: request-termination
+        config:
+          status_code: 404
+          message: Route tidak ada
+consumers:
+  - username: anonymous
+  - username: identity-svc
+    jwt_secrets:
+      - key: dev-2026a
+        algorithm: ES256
+        rsa_public_key: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsAybyFYkhsrHnf5zbvS3jxccqexv\nobywUZycigbbN1W8SxO3laq+/zfS3ZuXO+g0DpFhSQMBzLYn9aw/D3LQIQ==\n-----END PUBLIC KEY-----"
+plugins:
+  - name: rate-limiting
+    config:
+      minute: 600
+      limit_by: ip
+      policy: local
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 1
+      size_unit: megabytes
+  - name: prometheus
+    config:
+      per_consumer: false
+      status_code_metrics: true
+      latency_metrics: true
+  - name: opentelemetry
+    config:
+      traces_endpoint: http://tempo:4318/v1/traces
+      resource_attributes:
+        service.name: kong
