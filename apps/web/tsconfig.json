@@ -1,0 +1,14 @@
+{
+  "extends": "@viora/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    // TanStack Start: verbatimModuleSyntax dimatikan supaya kode server tidak bocor ke bundle client.
+    "verbatimModuleSyntax": false,
+    // Ikut api-client: kode hasil generate hey-api belum lolos exactOptionalPropertyTypes.
+    "exactOptionalPropertyTypes": false,
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["src", "vite.config.ts"]
+}

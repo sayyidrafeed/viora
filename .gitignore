@@ -7,3 +7,6 @@ dist/
 !.env.example
 .DS_Store
 .claude/settings.local.json
+.output/
+.tanstack/
+.vinxi/
