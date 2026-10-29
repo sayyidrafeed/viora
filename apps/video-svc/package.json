@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@viora/contracts": "workspace:*",
-    "@viora/service-kit": "workspace:*"
+    "@viora/service-kit": "workspace:*",
+    "hono": "4.13.14",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@viora/config": "workspace:*"

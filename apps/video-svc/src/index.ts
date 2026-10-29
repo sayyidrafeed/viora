@@ -1,5 +1,6 @@
-import { createApp } from '@viora/service-kit'
+import { createApp, loadEnv, portEnv } from '@viora/service-kit'
 
+const env = loadEnv('video-svc', { PORT: portEnv(13004) })
 const app = createApp('video-svc')
 
-export default { port: Number(process.env.PORT ?? 13004), fetch: app.fetch }
+export default { port: env.PORT, fetch: app.fetch }

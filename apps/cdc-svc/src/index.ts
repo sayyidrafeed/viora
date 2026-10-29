@@ -1,5 +1,6 @@
-import { createApp } from '@viora/service-kit'
+import { createApp, loadEnv, portEnv } from '@viora/service-kit'
 
+const env = loadEnv('cdc-svc', { PORT: portEnv(13008) })
 const app = createApp('cdc-svc')
 
-export default { port: Number(process.env.PORT ?? 13008), fetch: app.fetch }
+export default { port: env.PORT, fetch: app.fetch }

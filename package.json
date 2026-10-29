@@ -3,14 +3,19 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.4.4",
-  "workspaces": ["apps/*", "packages/*", "spikes/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "spikes/*"
+  ],
   "scripts": {
     "dev:infra": "docker compose -f infra/compose/compose.yaml --profile core up -d --wait",
     "dev:infra:down": "docker compose -f infra/compose/compose.yaml --profile core down",
     "new:service": "bun tools/new-service.ts",
     "lint": "oxlint .",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "new:module": "bun tools/new-module.ts"
   },
   "devDependencies": {
     "@types/bun": "1.4.4",
