@@ -11,17 +11,20 @@ import { envelopeSchema, identityEventData, type IdentityEventType } from '@vior
 import { loadPublicKeys, redisDenylist } from '@viora/service-kit'
 import { buildApp } from '../src/app.ts'
 import { createAuth } from '../src/auth/auth.ts'
-import { createDb, type Db } from '../src/db/client.ts'
+import { bootstrapDatabase } from '../../../tools/db-bootstrap.ts'
+import { createDb, migrationsConfig, type Db } from '../src/db/client.ts'
 import { channel, user } from '../src/db/schema.ts'
 import { meService } from '../src/modules/me/index.ts'
 import { loadEnv } from '../src/env.ts'
 import type { Mail } from '../src/mailer.ts'
 
-// App lewat PgBouncer (transaction pooling) seperti di prod; buat database dan migrasi lewat koneksi langsung.
-const directBase = process.env.DATABASE_DIRECT_URL ?? 'postgres://viora:viora-dev@127.0.0.1:15432/viora'
-const pooledBase = process.env.DATABASE_URL ?? 'postgres://viora:viora-dev@127.0.0.1:16432/viora'
+// Seperti di prod: database dibuat admin lalu di-bootstrap, migrasi lewat koneksi langsung, dan app lewat PgBouncer,
+// keduanya dengan role identity_svc yang hanya memiliki schema identity.
+const adminUrl = process.env.DATABASE_ADMIN_URL ?? 'postgres://viora:viora-dev@127.0.0.1:15432/viora'
+const adminSql = new SQL(adminUrl)
+const directBase = 'postgres://identity_svc:identity-svc-dev@127.0.0.1:15432/viora'
+const pooledBase = 'postgres://identity_svc:identity-svc-dev@127.0.0.1:16432/viora'
 const dbName = `identity_test_${Date.now().toString(36)}`
-const adminSql = new SQL(directBase)
 const withDb = (base: string) => Object.assign(new URL(base), { pathname: `/${dbName}` }).toString()
 let sql: SQL
 let db: Db
@@ -39,8 +42,11 @@ beforeAll(async () => {
   writeFileSync(join(keyDir, `${KID}.pub.pem`), await exportSPKI(publicKey))
 
   await adminSql.unsafe(`create database ${dbName}`)
+  const dbAdmin = new SQL(withDb(adminUrl))
+  await bootstrapDatabase(dbAdmin, dbName)
+  await dbAdmin.close()
   const migrator = new SQL(withDb(directBase))
-  await migrate(createDb(migrator), { migrationsFolder: join(import.meta.dir, '..', 'drizzle') })
+  await migrate(createDb(migrator), { migrationsFolder: join(import.meta.dir, '..', 'drizzle'), ...migrationsConfig })
   await migrator.close()
   sql = new SQL(withDb(pooledBase))
   db = createDb(sql)
