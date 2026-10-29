@@ -1273,7 +1273,7 @@ Exit criteria §18 M0:
 | Login dari web lewat Kong di lokal | Terpenuhi | Click-through di browser lewat http://localhost:18000: daftar, buka link verifikasi, shell menampilkan profil dari `/v1/me`, keluar, password salah ditolak, masuk lagi. `e2e/auth-via-kong.test.ts` menguji jalur HTTP yang sama dan memastikan halaman web dilayani Kong |
 | Mobile atau script uji mendapat JWT dari `/v1/auth/token` dengan sesi Expo | Terpenuhi lewat script uji | Test kontrak `@better-auth/expo` di identity-svc (revisi 15). Pembacaan `set-cookie` oleh `fetch` React Native di perangkat tetap dicek di M6 |
 | Trace satu request terlihat di Tempo dari Kong sampai identity-svc | Terpenuhi | E2E mengirim `traceparent` dengan trace id yang diketahui, lalu menemukan span `kong` dan `identity-svc` di Tempo lewat API |
-| CI hijau di branch pertama | Lihat revisi 17 | `.github/workflows/ci.yml` |
+| CI hijau di branch pertama | Terpenuhi | Run GitHub Actions 40902233622 di `main` (commit `5f9d5a3`): job `static` dan `integration` sukses pada percobaan pertama, termasuk E2E dan trace Tempo di runner Linux |
 
 Deliverable lain yang selesai di revisi 17:
 
