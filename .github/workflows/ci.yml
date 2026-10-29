@@ -64,10 +64,12 @@ jobs:
         run: |
           docker compose -f infra/compose/compose.yaml --profile core up -d --wait
           docker compose -f infra/compose/compose.yaml --profile obs up -d tempo
-      - name: migrasi dan topic
+      - name: role per service, migrasi, dan topic
         run: |
+          bun run db:bootstrap
           (cd apps/identity-svc && bun run db:migrate)
           docker exec viora-redpanda-1 rpk topic create identity.v1 -p 3
+      - run: bun test tools/db-bootstrap.test.ts
       - run: cd packages/service-kit && bun test --timeout 60000
       - run: cd apps/identity-svc && bun test --timeout 60000
       - run: cd spikes/kafka-bun && bun test --timeout 120000

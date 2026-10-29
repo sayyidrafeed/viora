@@ -1,1 +1,8 @@
 "viora" "viora-dev"
+"identity_svc" "identity-svc-dev"
+"upload_svc" "upload-svc-dev"
+"video_svc" "video-svc-dev"
+"social_svc" "social-svc-dev"
+"feed_svc" "feed-svc-dev"
+"notification_svc" "notification-svc-dev"
+"live_svc" "live-svc-dev"
