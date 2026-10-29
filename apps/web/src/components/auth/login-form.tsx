@@ -1,6 +1,7 @@
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
+import { emailRules, passwordRules } from '@/lib/auth/validators'
 import type { useLogin } from '@/hooks/use-login'
 
 export function LoginForm({ form, error }: ReturnType<typeof useLogin>) {
@@ -14,7 +15,7 @@ export function LoginForm({ form, error }: ReturnType<typeof useLogin>) {
       }}
     >
       {error ? <Alert tone="error">{error}</Alert> : null}
-      <form.Field name="email" validators={{ onSubmit: ({ value }) => (value.includes('@') ? undefined : 'Isi email yang valid.') }}>
+      <form.Field name="email" validators={emailRules}>
         {(field) => (
           <Field
             id="email"
@@ -28,7 +29,7 @@ export function LoginForm({ form, error }: ReturnType<typeof useLogin>) {
           />
         )}
       </form.Field>
-      <form.Field name="password" validators={{ onSubmit: ({ value }) => (value ? undefined : 'Isi password.') }}>
+      <form.Field name="password" validators={passwordRules}>
         {(field) => (
           <Field
             id="password"

@@ -1,6 +1,7 @@
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
+import { emailRules, nameRules, newPasswordRules } from '@/lib/auth/validators'
 import type { useRegister } from '@/hooks/use-register'
 
 export function RegisterForm({ form, error, sentTo, changeEmail }: ReturnType<typeof useRegister>) {
@@ -27,7 +28,7 @@ export function RegisterForm({ form, error, sentTo, changeEmail }: ReturnType<ty
       }}
     >
       {error ? <Alert tone="error">{error}</Alert> : null}
-      <form.Field name="name" validators={{ onSubmit: ({ value }) => (value.trim() ? undefined : 'Isi nama.') }}>
+      <form.Field name="name" validators={nameRules}>
         {(field) => (
           <Field
             id="name"
@@ -40,7 +41,7 @@ export function RegisterForm({ form, error, sentTo, changeEmail }: ReturnType<ty
           />
         )}
       </form.Field>
-      <form.Field name="email" validators={{ onSubmit: ({ value }) => (value.includes('@') ? undefined : 'Isi email yang valid.') }}>
+      <form.Field name="email" validators={emailRules}>
         {(field) => (
           <Field
             id="email"
@@ -54,7 +55,7 @@ export function RegisterForm({ form, error, sentTo, changeEmail }: ReturnType<ty
           />
         )}
       </form.Field>
-      <form.Field name="password" validators={{ onSubmit: ({ value }) => (value.length >= 8 ? undefined : 'Password minimal 8 karakter.') }}>
+      <form.Field name="password" validators={newPasswordRules}>
         {(field) => (
           <Field
             id="password"

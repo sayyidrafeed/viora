@@ -1,46 +1,134 @@
 @import 'tailwindcss';
 
-/* Draft tanpa arah desain (antislop R-37): netral, satu aksen (biru) untuk fokus dan wordmark, merah hanya untuk error. Ganti setelah DESIGN.md ada. */
+/* Token dari DESIGN.md (arah "apple-design"). Ubah DESIGN.md dulu, baru file ini. */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
   --color-surface: var(--surface);
-  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root {
   color-scheme: light dark;
   --surface: #ffffff;
-  --surface-muted: #f4f4f5;
-  --ink: #18181b;
-  --ink-muted: #52525b;
-  --line: #d4d4d8;
-  /* Border input: kontras non-teks minimal 3:1 terhadap permukaan. */
-  --line-strong: #71717a;
+  --surface-raised: #f5f5f7;
+  --ink: #1d1d1f;
+  --ink-muted: #5b5b62;
+  --line: #d2d2d7;
+  --line-strong: #86868b;
   --accent: #1d4ed8;
-  --danger: #b42318;
+  --on-accent: #ffffff;
+  --danger: #c4271b;
+  --material: rgb(255 255 255 / 0.72);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface: #121214;
-    --surface-muted: #1c1c1f;
-    --ink: #f4f4f5;
-    --ink-muted: #a1a1aa;
-    --line: #3f3f46;
+    --surface: #0f0f11;
+    --surface-raised: #1a1a1d;
+    --ink: #f5f5f7;
+    --ink-muted: #a1a1a8;
+    --line: #38383d;
     --line-strong: #8a8a93;
-    --accent: #93c5fd;
-    --danger: #f97066;
+    --accent: #7aa7ff;
+    --on-accent: #0f0f11;
+    --danger: #ff7a6e;
+    --material: rgb(15 15 17 / 0.72);
   }
 }
 
 body {
   background: var(--surface);
   color: var(--ink);
-  font-family: var(--font-sans);
+  font: 100%/1.5 var(--font-sans);
+}
+
+/* Tracking dan leading mengikuti ukuran (DESIGN.md, Tipografi). */
+@utility type-display {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  font-weight: 600;
+}
+@utility type-title {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  font-weight: 600;
+}
+@utility type-label {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+@utility type-caption {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+}
+
+/* Umpan balik di pointer-down, bukan saat dilepas. */
+@utility press {
+  transition: transform 100ms ease-out;
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+/* Material chrome: konten di-scroll di bawahnya, tepi bawah berupa efek scroll, bukan garis. */
+@utility material {
+  background: var(--material);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Elemen yang tidak dipegang (pesan, state sukses) muncul dengan geser 4px + opacity. */
+@utility enter {
+  animation: enter 200ms var(--ease-out-soft);
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+  .enter {
+    animation: fade 150ms linear;
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --line: var(--line-strong);
+  }
+  .material {
+    background: var(--surface);
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--ink);
+  }
 }
