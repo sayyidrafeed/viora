@@ -4,7 +4,7 @@ Viora adalah platform video ala YouTube yang dibangun sebagai portofolio system 
 
 Status: disetujui sebagai rencana. M0 dimulai 2026-10-29: scaffold monorepo, spike, dan walking skeleton ada di repo [sayyidrafeed/viora](https://github.com/sayyidrafeed/viora) (belum ada infrastruktur server).
 
-Revisi 1 sampai 15 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 dan 15 berisi hasil spike M0 dan identity-svc. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
+Revisi 1 sampai 16 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 16 berisi hasil spike M0, identity-svc, dan hardening setelah code review. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
 
 ## Daftar isi
 
@@ -1230,7 +1230,7 @@ Keputusan terbuka: `service-kit` saat ini memakai `Bun.SQL`, sedangkan rencana m
 
 ### Hasil identity-svc M0 (2026-10-29)
 
-Diuji di Postgres 17, Redis 8.6, dan Redpanda asli. Test integrasi memakai database baru per run: 10/10 lolos, tiga kali berturut-turut, dan diulang verifier independen. Setelah review verifier ditambah tiga test regresi (13 total). Ketiganya baru lolos typecheck dan belum dijalankan, karena infra lokal sedang dimatikan. Ditambah satu smoke test proses nyata: identity-svc dijalankan sebagai server dengan relay aktif. Daftar lewat HTTP menghasilkan `user.registered` di topic `identity.v1`, diterima `EventConsumer` dengan validasi data per tipe, dalam 176 ms (satu sampel).
+Diuji di Postgres 17, Redis 8.6, dan Redpanda asli. Test integrasi memakai database baru per run: 10/10 lolos, tiga kali berturut-turut, dan diulang verifier independen. Setelah review verifier ditambah tiga test regresi (13 total). Sejak revisi 16 semuanya jalan lewat PgBouncer: 13/13 lolos tiga kali, dan test penghapusan bersamaan dibuktikan lewat mutasi. Ditambah satu smoke test proses nyata: identity-svc dijalankan sebagai server dengan relay aktif. Daftar lewat HTTP menghasilkan `user.registered` di topic `identity.v1`, diterima `EventConsumer` dengan validasi data per tipe, dalam 176 ms (satu sampel).
 
 | Bagian | Hasil | Belum dibuktikan |
 |---|---|---|
@@ -1250,7 +1250,7 @@ Temuan yang mengubah rencana:
 - Keputusan terbuka Drizzle vs `Bun.SQL` selesai: kode aplikasi dan `writeOutbox` memakai Drizzle (`bun-sql`), sedangkan relay memakai koneksi `Bun.SQL` reserved untuk advisory lock.
 - Port service lokal digeser ke 13001–13011 (port 3000-an sudah dipakai proses lain di mesin dev), konsisten dengan port infra +10000.
 
-Perbaikan dari review verifier independen (test regresinya belum dijalankan):
+Perbaikan dari review verifier independen (test regresinya lolos sejak revisi 16):
 
 - Dua `DELETE /v1/me` bersamaan: request yang kalah (404) dulu menghapus denylist milik user yang sudah dihapus, sehingga JWT yang masih berlaku lolos lagi di service lain. Sekarang denylist hanya dibatalkan kalau user masih ada.
 - Body `DELETE /v1/me` dibaca tanpa bergantung pada `content-type`. Sebelumnya `{"purgeComments":true}` tanpa header itu diabaikan diam-diam, dan body kosong dengan `content-type: application/json` dijawab 400.
@@ -1521,3 +1521,22 @@ Sumber: identity-svc M0 dan spike token Expo (lihat §18A, Hasil identity-svc M0
 | Tabel `jwks` dengan `check (false)` | Validasi schema Better Auth menuntut tabelnya, sementara kunci hanya boleh dari keyring |
 | `EventConsumer` membuat topic retry dan DLQ miliknya | Topic itu milik consumer group, dengan retensi 14 hari |
 | Kontrak token Expo dari sisi server terbukti, sisa pengecekan di perangkat dipindah ke M6 | Spike M0 |
+
+### Revisi 16, 2026-10-29
+
+Sumber: code review dua sumbu (standar §13 dan kesesuaian spec) atas semua kode M0.
+
+| Perubahan | Alasan |
+|---|---|
+| PgBouncer (transaction pooling, `max_prepared_statements = 200`) masuk Compose profile `core` di port 16432. App memakai `DATABASE_URL` lewat PgBouncer, relay dan migrasi memakai `DATABASE_DIRECT_URL` | Relay sebelumnya mengambil advisory lock dari pool yang sama dengan app, padahal §6 mewajibkan koneksi langsung. Test identity-svc kini jalan lewat PgBouncer (261 transaksi tercatat di statistik PgBouncer per run) |
+| Header `x-attempt` berisi total percobaan handler lintas tahap (3 di tahap utama + 3 di tahap retry = 6) | Sebelumnya berisi nomor tahap, padahal §6 meminta DLQ membawa jumlah percobaan |
+| `user.banned`: `reason` dan `expiresAt` menjadi `nullish` | Payload §10 menulis keduanya opsional |
+| `DomainError` abstrak dengan `status` dan `code` tetap per subclass. `service-kit` menyediakan `RouteNotFoundError`, `InvalidBodyError`, `UnauthorizedError`, `InvalidTokenError`, `AccountBannedError`, dan setiap modul punya file `errors` sendiri | §13: service melempar subclass `DomainError` |
+| Modul `me` dipecah menjadi `schema`, `service`, `handlers`, `routes`, `errors`, `index`. Response diturunkan dari tabel lewat drizzle-zod, dan body divalidasi oleh middleware `jsonBody` sesudah middleware sesi | §13: layout modul, urutan middleware, drizzle-zod |
+| `userAuth().required` memberi tipe `user` non-null, `optional` memberi `user` nullable | Handler tidak lagi bergantung pada `!` |
+| `loadEnv` di `service-kit` dipakai identity-svc, skrip migrasi, dan semua skeleton service | §13: env divalidasi saat start. Skeleton lama menerima `PORT` bernilai `NaN` |
+| `bun run new:module` membuat 6 file modul. `new:service` menambah AGENTS.md (berisi checklist), symlink CLAUDE.md, dan dependency `hono` dan `zod`. Sepuluh skeleton dibuat ulang | §13 Guardrail |
+| AGENTS.md root dan per workspace (root 36 baris) dengan symlink CLAUDE.md, ditambah `docs/architecture/owners.md` | §13 Guardrail |
+| Lint menolak `import { Hono } from 'hono'` di luar `service-kit`, impor ke file internal modul dari luar modul, dan impor antar-modul yang tidak lewat `index.ts` | §13 Guardrail. Aturan dibuktikan dengan file probe, tanpa false positive di kode yang ada |
+
+Belum dikerjakan dari hasil review: verifikasi token service dan klien internal cockatiel, profile Compose `obs`, `tracestate` di outbox, `LISTEN/NOTIFY` untuk relay, dan aturan lint anti-slop. Semuanya dijadwalkan bersama service kedua di M1, atau bersama OTel. `autoSignInAfterVerification` tetap dipakai: flow 01 langsung masuk ke beranda setelah verifikasi email.
