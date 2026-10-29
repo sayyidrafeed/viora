@@ -34,7 +34,7 @@ Token service:
 - Event identity ditulis trigger Postgres di transaksi Better Auth (ADR 004). `user.deleted` dan `channel.deleted` ditulis eksplisit oleh `DELETE /v1/me`.
 - Origin hanya diperiksa untuk request yang membawa cookie. Sign-in tanpa cookie tidak dicek, dan itu semantik CSRF Better Auth.
 - Terbukti di M0: keyring 12/12 test di spike, 13/13 test integrasi identity-svc lewat PgBouncer, kontrak token Expo dari sisi server, dan perbaikan dua `DELETE /v1/me` bersamaan (dibuktikan lewat mutasi).
-- Belum terbukti: login Google, penyedia email nyata (ADR 025), reload kunci saat file berubah, denylist di route `optional` (benar di kode, belum ada test), pembatalan denylist saat transaksi gagal, `fetch` React Native membaca `set-cookie` di perangkat (M6), discovery OIDC k3s (spike M1).
+- Belum terbukti: login Google, pengiriman lewat Resend sungguhan (ADR 025 Diterima, menunggu domain dan API key), reload kunci saat file berubah, denylist di route `optional` (benar di kode, belum ada test), pembatalan denylist saat transaksi gagal, `fetch` React Native membaca `set-cookie` di perangkat (M6), discovery OIDC k3s (spike M1).
 - Belum dikerjakan di M0: verifikasi token service, route admin ban/unban, `PATCH /v1/me`, route channel.
 - Baris `verification` milik email user tidak ikut dihapus saat `DELETE /v1/me` dan kedaluwarsa sendiri. Ini berbeda dengan matriks pembersihan di §10.
 

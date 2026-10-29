@@ -36,7 +36,7 @@ Kalau ADR bertentangan dengan grand plan, revisi terbaru di grand plan §20 yang
 | 022 | Backup hanya `pg_dump` harian sebagai risiko yang diterima | M1 | Belum ditulis (M1) | |
 | 023 | SOPS + age untuk secret | M1 | Belum ditulis (M1) | |
 | 024 | Retry bertahap dan DLQ per consumer group | M0 | Diterima (2026-10-28) | [024](024-retry-bertahap-dlq-per-consumer-group.md) |
-| 025 | Penyedia email transaksional | M0 | Terbuka | [025](025-penyedia-email-transaksional.md) |
+| 025 | Penyedia email transaksional (Resend) | M0 | Diterima | [025](025-penyedia-email-transaksional.md) |
 | 026 | Client Kafka dan runtime proses Kafka di Bun | M0 | Diterima (2026-10-29) | [026](026-client-kafka-runtime-bun.md) |
 | 027 | Evolusi skema event: cek kompatibilitas di CI, tanpa registry | M0 | Diterima (2026-10-28) | [027](027-evolusi-skema-event-tanpa-registry.md) |
 | 028 | Policy panggilan sinkron: timeout, satu lapis retry, deadline, breaker terbatas | M0 | Diterima (2026-10-28) | [028](028-policy-panggilan-sinkron.md) |

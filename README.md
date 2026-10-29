@@ -73,7 +73,7 @@ cd apps/web && bun run dev
 
 `db:bootstrap` membuat role dan schema per service; identity-svc login sebagai `identity_svc` yang hanya memiliki schema `identity`. App memakai `DATABASE_URL` lewat PgBouncer, sedangkan relay outbox dan migrasi memakai `DATABASE_DIRECT_URL` langsung ke Postgres. Isi `AUTH_SECRET` di `.env` dengan hasil `openssl rand -base64 48`. Service menolak start kalau nilainya masih contoh. `keys:dev` membuat keypair ES256 di `infra/keys/dev`. Private key-nya diabaikan git, dan lingkungan selain dev memakai kunci dari SOPS.
 
-Selama penyedia email belum dipilih, email verifikasi dan reset password ditulis ke log service.
+Email dikirim lewat Resend (ADR 025). Di dev `MAIL_PROVIDER=log`, jadi link verifikasi dan reset password ditulis ke log service. Untuk mengirim sungguhan, isi `MAIL_PROVIDER=resend`, `RESEND_API_KEY`, dan `MAIL_FROM` dari domain yang sudah diverifikasi di Resend.
 
 ## Test
 

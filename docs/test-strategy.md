@@ -82,7 +82,7 @@ Daftar dari grand plan §18A:
 - Urutan publish ke Kafka untuk transaksi multi-event.
 - Dedupe producer saat retry kirim, broker restart, throughput.
 - Reload kunci saat file berubah, denylist di route `optional`, pembatalan denylist saat transaksi gagal (hanya dicek verifier dengan fake).
-- Login Google, penyedia email nyata (ADR 025), `fetch` React Native membaca `set-cookie` di perangkat (M6).
+- Login Google, pengiriman ke Resend sungguhan (kontrak adapter diuji di `apps/identity-svc/test/mailer.test.ts`, ADR 025), `fetch` React Native membaca `set-cookie` di perangkat (M6).
 - Test pembanding migrasi `0001` identity dengan `outboxDdl`.
 
 ## Rujukan

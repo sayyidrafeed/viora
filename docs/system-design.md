@@ -121,7 +121,7 @@ Aturan kepemilikan (ADR 001):
 - Tidak ada JOIN lintas schema. Data service lain diambil lewat API sinkron atau proyeksi lokal dari event.
 - Worker tidak menulis ke database. Hanya `metrics-svc` yang menulis ke Scylla.
 
-Infrastruktur bersama: Postgres 17 + PgBouncer, `redis-cache` (boleh eviction) dan `redis-durable` (`noeviction`), Redpanda, Flink 2.2.x session cluster, ScyllaDB source-available, Meilisearch, R2 + CDN, Worker `media-edge`, dan penyedia email (ADR 025, terbuka). Pemilik setiap tabel dan topic: [owners.md](architecture/owners.md). Detail: grand plan §5 dan §7.
+Infrastruktur bersama: Postgres 17 + PgBouncer, `redis-cache` (boleh eviction) dan `redis-durable` (`noeviction`), Redpanda, Flink 2.2.x session cluster, ScyllaDB source-available, Meilisearch, R2 + CDN, Worker `media-edge`, dan Resend sebagai penyedia email (ADR 025). Pemilik setiap tabel dan topic: [owners.md](architecture/owners.md). Detail: grand plan §5 dan §7.
 
 ## 6. Komunikasi
 

@@ -4,7 +4,7 @@ Viora adalah platform video ala YouTube yang dibangun sebagai portofolio system 
 
 Status: disetujui sebagai rencana. M0 selesai 2026-10-29 di repo [sayyidrafeed/viora](https://github.com/sayyidrafeed/viora) (lihat §18A, Penyelesaian M0). Belum ada infrastruktur server.
 
-Revisi 1 sampai 18 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 18 berisi hasil spike M0, identity-svc, hardening setelah code review, penyelesaian M0, dan tindak lanjutnya. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
+Revisi 1 sampai 19 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 19 berisi hasil spike M0, identity-svc, hardening setelah code review, penyelesaian M0, dan tindak lanjutnya. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
 
 ## Daftar isi
 
@@ -1289,7 +1289,7 @@ Deliverable lain yang selesai di revisi 17:
 - Producer `@platformatic/kafka` memaksa `maxInflights = 1` saat `idempotent: true`, jadi syarat §6 `max.in.flight ≤ 5` terpenuhi tanpa konfigurasi tambahan.
 - `packages/design-tokens` dan `apps/mobile` ditunda ke M6. Layout §13 mencantumkannya, tapi aturan "package baru butuh dua consumer nyata" belum terpenuhi sebelum mobile ada.
 
-Tetap terbuka setelah M0: penyedia email (ADR 025, dev masih menulis email ke log), `dlq:replay` dan `dlq:skip`, `LISTEN/NOTIFY` relay, VictoriaLogs dan vmagent, pemilihan lane CI per diff, Playwright, dan login Google. Role database per service dan arah desain UI selesai di revisi 18.
+Tetap terbuka setelah M0: domain pengirim dan API key Resend (ADR 025 sudah Diterima, revisi 19), `dlq:replay` dan `dlq:skip`, `LISTEN/NOTIFY` relay, VictoriaLogs dan vmagent, pemilihan lane CI per diff, Playwright, dan login Google. Role database per service dan arah desain UI selesai di revisi 18.
 
 Perkiraan confidence setelah spike M0: sekitar 7,5/10. Desain tidak berubah kecuali partitioner dan validasi `data`. Sisa jalan ke 8/10 adalah spike M1.
 
@@ -1594,3 +1594,15 @@ Sumber: tindak lanjut M0 dari pemilik proyek.
 | Node 26 LTS (26.13.0) di `.node-version` dan CI (`actions/setup-node@v7`), `actions/checkout@v7` | Node 26 menjadi LTS 2026-10-28. Peringatan Node 20 di CI hilang. Runtime action GitHub sendiri masih `node24` |
 | `DESIGN.md` dari arah "apple-design" pilihan pemilik: token warna, tipografi dengan tracking per ukuran, material untuk chrome, umpan balik saat ditekan, spring hanya untuk elemen yang bisa dipegang, dukungan reduced motion, reduced transparency, dan high contrast | UI M0 sebelumnya berstatus "draft without direction" |
 | Alasan penolakan alternatif di ADR 002, 003, 005, 008, dan 021 ditulis technical architect atas delegasi pemilik | Grand plan sebelumnya tidak mencatat alasannya |
+
+### Revisi 19, 2026-10-29
+
+Sumber: keputusan pemilik proyek, penyedia email Resend.
+
+| Perubahan | Alasan |
+|---|---|
+| ADR 025 Diterima: Resend lewat REST API `POST /emails`, tanpa SDK | Keputusan pemilik |
+| `MAIL_PROVIDER=log|resend` eksplisit; service gagal start kalau `resend` tanpa `RESEND_API_KEY` dan `MAIL_FROM`, atau `log` di production | Konfigurasi email yang salah harus ketahuan saat deploy, bukan saat user mendaftar |
+| Satu `Idempotency-Key` per email di semua percobaan; retry hanya 429, 5xx, dan error jaringan | Retry setelah respons hilang tidak boleh mengirim email ganda (§6) |
+
+Sisa langkah pemilik: verifikasi domain pengirim di Resend (SPF, DKIM) dan simpan API key di SOPS.
