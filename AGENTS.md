@@ -4,12 +4,14 @@ Monorepo Bun + Turborepo untuk platform video. Rencana dan semua keputusan ada d
 
 ## Perintah
 
-- `bun run dev:infra` dan `bun run dev:infra:down`: Postgres, PgBouncer, Redpanda, Redis, Kong (profile `core`).
+- `bun run dev:infra` (profile `core`: Postgres, PgBouncer, Redpanda, Redis, Kong), `bun run dev:obs` (`core` + Tempo, VictoriaMetrics, Grafana di 13300), `bun run dev:infra:down`.
 - `bunx turbo run typecheck`, `bunx oxlint .`
 - Test integrasi butuh infra menyala: `cd <workspace> && bun test --timeout 60000`.
 - `bun run new:service <nama>-svc <port 13xxx>` dan `bun run new:module <nama>-svc <modul>`.
+- `bun run test:e2e`: menyalakan identity-svc dan web sendiri, lalu menguji lewat Kong dan Tempo (butuh `dev:obs`).
+- File hasil generate tidak diedit tangan (hook `.claude/settings.json` menolaknya): `apps/*/openapi.json` (`bun run openapi`), `infra/kong/kong.yaml` (`bun run kong:config`), `packages/contracts/event-schemas.json` (`bun run schemas`), `packages/api-client/src/generated` (`bun run generate`), `apps/web/src/routeTree.gen.ts` (Vite). CI menjalankan `tools/ci/check-generated.sh`.
 
-Port lokal digeser +10000 dari default: Postgres 15432, PgBouncer 16432, Redis 16379, Redpanda 19092, Kong 18000/18001, service 13001 sampai 13011.
+Port lokal digeser +10000 dari default: Postgres 15432, PgBouncer 16432, Redis 16379, Redpanda 19092, Kong 18000/18001, Tempo 13200, web 13000, service 13001 sampai 13011. Web dan API diakses lewat Kong di http://localhost:18000.
 
 ## Konvensi service (§13)
 
@@ -19,6 +21,7 @@ Port lokal digeser +10000 dari default: Postgres 15432, PgBouncer 16432, Redis 1
 - Urutan middleware: sesi (`userAuth().required` atau `.optional`), izin, lalu validator (`jsonBody(schema)`).
 - Skema response dan request diturunkan dari tabel Drizzle lewat drizzle-zod kalau bentuknya mengikuti tabel.
 - Env divalidasi saat start dengan `loadEnv` dari service-kit. Service gagal start kalau env kurang.
+- Panggilan antar-service lewat `createInternalFetch` dan route `/internal` dijaga `serviceAuth` (ADR 028). Tambahkan route publik baru dengan `describeRoute`; route tanpa `x-auth` dianggap `required` oleh generator Kong.
 - Service tidak boleh mengimpor kode service lain. Kode bersama hanya lewat `packages/*`, dan package baru butuh dua consumer nyata.
 
 ## Event dan data

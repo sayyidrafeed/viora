@@ -2,9 +2,9 @@
 
 Viora adalah platform video ala YouTube yang dibangun sebagai portofolio system design. Dokumen ini merangkum semua keputusan dari sesi grilling (7 ronde) dan menjadi sumber untuk dokumen turunan di M0: system design doc, ADR, PRD per milestone, dan event catalog.
 
-Status: disetujui sebagai rencana. M0 dimulai 2026-10-29: scaffold monorepo, spike, dan walking skeleton ada di repo [sayyidrafeed/viora](https://github.com/sayyidrafeed/viora) (belum ada infrastruktur server).
+Status: disetujui sebagai rencana. M0 selesai 2026-10-29 di repo [sayyidrafeed/viora](https://github.com/sayyidrafeed/viora) (lihat §18A, Penyelesaian M0). Belum ada infrastruktur server.
 
-Revisi 1 sampai 16 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 16 berisi hasil spike M0, identity-svc, dan hardening setelah code review. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
+Revisi 1 sampai 17 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 17 berisi hasil spike M0, identity-svc, hardening setelah code review, dan penyelesaian M0. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
 
 ## Daftar isi
 
@@ -1262,7 +1262,34 @@ Perbaikan dari review verifier independen (test regresinya lolos sejak revisi 16
   - Urutan relay mengikuti `xid`, bukan urutan commit, jadi penjaga versi wajib di semua proyeksi.
   - Migrasi `0001` menyalin `outboxDdl` secara manual. Test pembanding keduanya belum ada.
 
-Belum dikerjakan di M0: `tools/kong-config.ts` dan login web lewat Kong, `PATCH /v1/me`, route channel, route admin ban/unban, role database per service, OTel, `apps/web`.
+Status bagian yang dulu belum dikerjakan: generator Kong, login web lewat Kong, OTel, dan `apps/web` selesai di revisi 17 (lihat "Penyelesaian M0"). `PATCH /v1/me`, route channel, route admin ban/unban, dan role database per service dipindah ke M1.
+
+### Penyelesaian M0 (2026-10-29)
+
+Exit criteria §18 M0:
+
+| Kriteria | Status | Bukti |
+|---|---|---|
+| Login dari web lewat Kong di lokal | Terpenuhi | Click-through di browser lewat http://localhost:18000: daftar, buka link verifikasi, shell menampilkan profil dari `/v1/me`, keluar, password salah ditolak, masuk lagi. `e2e/auth-via-kong.test.ts` menguji jalur HTTP yang sama dan memastikan halaman web dilayani Kong |
+| Mobile atau script uji mendapat JWT dari `/v1/auth/token` dengan sesi Expo | Terpenuhi lewat script uji | Test kontrak `@better-auth/expo` di identity-svc (revisi 15). Pembacaan `set-cookie` oleh `fetch` React Native di perangkat tetap dicek di M6 |
+| Trace satu request terlihat di Tempo dari Kong sampai identity-svc | Terpenuhi | E2E mengirim `traceparent` dengan trace id yang diketahui, lalu menemukan span `kong` dan `identity-svc` di Tempo lewat API |
+| CI hijau di branch pertama | Lihat revisi 17 | `.github/workflows/ci.yml` |
+
+Deliverable lain yang selesai di revisi 17:
+
+- `tools/kong-config.ts` membuat `infra/kong/kong.yaml` dari spec OpenAPI. Router Kong 3.9 memakai regex Rust tanpa lookahead, jadi path API yang tidak terdaftar (termasuk `/v1/auth/admin/*` dan `/v1/auth/delete-user`) ditolak oleh route prefix `/v1/` dengan `request-termination` 404, bukan oleh regex negatif. Path regex ditulis `~/...$` karena Kong meng-anchor awal path sendiri.
+- Spec OpenAPI identity-svc ditulis tanpa server, database, atau kunci (`bun run openapi`), dengan skema keamanan `bearerAuth` sebagai default supaya sama dengan kelas route Kong `required`.
+- `service-kit`: verifikasi token service (`serviceAuth`, dev memakai issuer statis, k3s memakai projected token), `createInternalFetch` (timeout 2 detik dibatasi sisa deadline, `x-deadline-ms`, retry hanya GET atau idempotency key dengan anggaran retry per proses, breaker opsional, 504 `deadline_exceeded`), dan OTel (garis paket 3.0, span HTTP dengan query string dibuang dari `url.full` karena link verifikasi membawa token, `traceparent` ke outbox lewat `set_config`, span consumer dengan link).
+- Profile Compose `obs`: Tempo 2.10, VictoriaMetrics (scrape metrik Kong), Grafana. Plugin `opentelemetry` dan `prometheus` Kong aktif.
+- `contracts`: skema `upload.v1`, `video.v1`, `transcode.v1` sesuai tabel Payload §10 dan state machine §8, satu file per domain. `channel.deleted` kini membawa `stateVersion` (versi terakhir + 1), sesuai aturan §10 bahwa semua `channel.*` membawa versi.
+- Cek kompatibilitas skema event di CI: snapshot `event-schemas.json` dibandingkan dengan snapshot di base memakai aturan BACKWARD. oasdiff memeriksa spec OpenAPI.
+- `packages/api-client` di-generate hey-api 0.99.0. hey-api butuh API JavaScript TypeScript, yang tidak ada di TypeScript 7 (compiler native), jadi package ini memakai TypeScript 6.0.3 khusus untuk codegen. Kode hasil generate belum lolos `exactOptionalPropertyTypes`, jadi opsi itu dimatikan di `api-client` dan `web`.
+- `apps/web`: TanStack Start 1.169, Vite 8, Tailwind 4, TanStack Form dan Query. Halaman daftar, masuk, dan shell client-only (`ssr: false`). UI berlabel "draft without direction" karena belum ada `DESIGN.md`.
+- Hook agent di `.claude/settings.json` menolak edit tangan ke file hasil generate.
+- Producer `@platformatic/kafka` memaksa `maxInflights = 1` saat `idempotent: true`, jadi syarat §6 `max.in.flight ≤ 5` terpenuhi tanpa konfigurasi tambahan.
+- `packages/design-tokens` dan `apps/mobile` ditunda ke M6. Layout §13 mencantumkannya, tapi aturan "package baru butuh dua consumer nyata" belum terpenuhi sebelum mobile ada.
+
+Tetap terbuka setelah M0: penyedia email (ADR 025, dev masih menulis email ke log), role database per service, `dlq:replay` dan `dlq:skip`, `LISTEN/NOTIFY` relay, VictoriaLogs dan vmagent, pemilihan lane CI per diff, Playwright, login Google, dan arah desain UI.
 
 Perkiraan confidence setelah spike M0: sekitar 7,5/10. Desain tidak berubah kecuali partitioner dan validasi `data`. Sisa jalan ke 8/10 adalah spike M1.
 
@@ -1540,3 +1567,18 @@ Sumber: code review dua sumbu (standar §13 dan kesesuaian spec) atas semua kode
 | Lint menolak `import { Hono } from 'hono'` di luar `service-kit`, impor ke file internal modul dari luar modul, dan impor antar-modul yang tidak lewat `index.ts` | §13 Guardrail. Aturan dibuktikan dengan file probe, tanpa false positive di kode yang ada |
 
 Belum dikerjakan dari hasil review: verifikasi token service dan klien internal cockatiel, profile Compose `obs`, `tracestate` di outbox, `LISTEN/NOTIFY` untuk relay, dan aturan lint anti-slop. Semuanya dijadwalkan bersama service kedua di M1, atau bersama OTel. `autoSignInAfterVerification` tetap dipakai: flow 01 langsung masuk ke beranda setelah verifikasi email.
+
+### Revisi 17, 2026-10-29
+
+Sumber: penyelesaian M0 (lihat §18A, Penyelesaian M0).
+
+| Perubahan | Alasan |
+|---|---|
+| Path API yang tidak terdaftar ditolak route prefix `/v1/` di Kong | Router Kong 3.9 tidak mendukung lookahead regex |
+| Spec OpenAPI memakai `bearerAuth` sebagai default, `x-auth` default `required` | Kelas route Kong dan klien hasil generate harus sepakat |
+| `channel.deleted` membawa `stateVersion` | §10 mewajibkan semua `channel.*` membawa versi; tabel payload lama tidak |
+| TypeScript 6.0.3 hanya di `packages/api-client` | hey-api butuh API JavaScript TypeScript yang tidak ada di TypeScript 7 |
+| `exactOptionalPropertyTypes` dimatikan di `api-client` dan `web` | Kode hasil generate hey-api belum lolos opsi itu dan tidak boleh diedit tangan |
+| Query string dibuang dari atribut `url.full` span HTTP | Link verifikasi email dan reset password membawa token di query |
+| `design-tokens` dan `apps/mobile` ditunda ke M6 | Aturan dua consumer nyata |
+| PgBouncer, OTel, profile `obs`, token service, dan klien internal masuk M0, bukan M1 seperti yang ditulis revisi 16 | Exit criteria trace di Tempo dan deliverable `service-kit` M0 |

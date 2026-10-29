@@ -29,7 +29,7 @@ Klaim yang hanya inferensi ditulis "inferensi".
 | 10 | Consumer idempoten dengan `processed_events` | Confirmed | Tambah purge retensi |
 | 11 | Timeout 2 detik, retry GET, circuit breaker | Partly | Satu lapis retry dengan jitter, deadline header, breaker hanya untuk dependency opsional |
 | 12 | Satu Postgres, schema dan role per service | Confirmed | Batas pool PgBouncer per role ditulis eksplisit |
-| 13 | 13 microservice untuk satu developer | Partly | Tetap (keputusan user), mitigasi ditulis di ADR 001 |
+| 13 | 12 service (awalnya ditulis 13) untuk satu developer | Partly | Tetap (keputusan user), mitigasi ditulis di ADR 001 |
 
 ## Asinkron
 
@@ -86,7 +86,7 @@ Keputusan: JSON Schema di-generate dari Zod di `packages/contracts`, lalu CI mem
 Keputusan:
 
 - Satu relay aktif per service (leader lewat advisory lock).
-- Outbox menyimpan kolom `xid8`. Relay hanya membaca baris dengan xid di bawah `pg_snapshot_xmin(pg_current_snapshot())`, diurutkan `(xid, id)`.
+- Outbox menyimpan kolom `xid8`. Relay hanya membaca baris dengan xid di bawah `pg_snapshot_xmin(pg_current_snapshot())`, diurutkan `(xid, seq)` sejak revisi 15 (awalnya `(xid, id)`; UUIDv7 tidak monoton di dalam satu milidetik).
 - Producer idempoten dengan `acks=all` dan in-flight ≤5.
 
 ## Sinkron
@@ -161,7 +161,7 @@ Keputusan:
 - `default_pool_size` dan `max_db_connections` ditulis eksplisit per role.
 - Advisory lock leader relay dan `LISTEN` memakai koneksi langsung ke Postgres, tidak lewat PgBouncer.
 
-### 13. 13 microservice untuk satu developer: Partly
+### 13. 12 service untuk satu developer (awalnya ditulis 13): Partly
 
 - Fowler: microservices punya biaya tambahan ("premium"), dan proyek baru sebaiknya tidak dimulai dengan microservices. Fowler juga mengakui buktinya terbatas, dan artikelnya tidak membahas developer solo. Sumber: https://martinfowler.com/bliki/MicroservicePremium.html, https://martinfowler.com/bliki/MonolithFirst.html
 

@@ -8,7 +8,7 @@ Rencana lengkapnya ada di [docs/grand-plan.md](docs/grand-plan.md): scope, NFR, 
 
 ## Status
 
-Milestone M0 (fondasi) sedang berjalan. Yang sudah ada di repo:
+Milestone M0 (fondasi) selesai. Yang ada di repo:
 
 | Bagian | Isi | Bukti |
 |---|---|---|
@@ -16,9 +16,12 @@ Milestone M0 (fondasi) sedang berjalan. Yang sudah ada di repo:
 | `packages/contracts` | Envelope event (Zod), nama topic, skema data event identity | dipakai test identity-svc |
 | `packages/service-kit` | Relay outbox (advisory lock, filter xmin), consumer dengan retry bertahap dan DLQ, `processOnce`, verifikasi JWT user dan denylist | `packages/service-kit/test`, termasuk test balapan consumer utama vs retry |
 | `apps/identity-svc` | Better Auth dengan Drizzle, keyring ES256, trigger outbox identity, `GET` dan `DELETE /v1/me`, akses database lewat PgBouncer | `apps/identity-svc/test` |
+| `apps/web` | TanStack Start: daftar, masuk, dan shell yang memanggil `/v1/me`, dilayani Kong satu origin dengan API | `e2e/` dan click-through manual |
+| `packages/api-client` | SDK dan `queryOptions` hasil generate hey-api dari spec OpenAPI | `tools/ci/check-generated.sh` |
+| Gateway dan observability | `kong.yaml` di-generate dari spec OpenAPI, trace OTel dari Kong sampai service di Tempo | `e2e/auth-via-kong.test.ts` |
 | `spikes/` | `@platformatic/kafka` di Bun, keyring Better Auth + plugin `jwt` Kong 3.9 | `spikes/*/` |
 
-Hasil spike, temuan yang mengubah rencana, dan hal yang belum dibuktikan dicatat di §18A grand plan. Konvensi kode untuk manusia maupun agent ada di [AGENTS.md](AGENTS.md), dan kepemilikan data per service ada di [docs/architecture/owners.md](docs/architecture/owners.md). Yang belum ada: generator konfigurasi Kong, `apps/web`, `apps/mobile`, dan semua service selain identity.
+Hasil spike, temuan yang mengubah rencana, dan hal yang belum dibuktikan dicatat di §18A grand plan. Konvensi kode untuk manusia maupun agent ada di [AGENTS.md](AGENTS.md), dan kepemilikan data per service ada di [docs/architecture/owners.md](docs/architecture/owners.md). Yang belum ada: `apps/mobile`, semua service selain identity, dan arah desain (`DESIGN.md`) untuk UI.
 
 ## Stack
 
@@ -45,8 +48,10 @@ Butuh Bun 1.4.4 dan Docker. Semua port host digeser +10000 dari default supaya t
 
 ```bash
 bun install
-bun run dev:infra
+bun run dev:obs
 ```
+
+Web dan API dibuka lewat Kong di http://localhost:18000, Grafana di http://localhost:13300. `bun run dev:infra` menyalakan profile `core` saja, tanpa Tempo dan Grafana.
 
 Menyiapkan identity-svc:
 
@@ -57,6 +62,12 @@ bun run keys:dev
 bun run db:migrate
 docker exec viora-redpanda-1 rpk topic create identity.v1 -p 3
 bun run dev
+```
+
+Menyalakan web (di terminal lain):
+
+```bash
+cd apps/web && bun run dev
 ```
 
 App memakai `DATABASE_URL` lewat PgBouncer, sedangkan relay outbox dan migrasi memakai `DATABASE_DIRECT_URL` langsung ke Postgres. Isi `AUTH_SECRET` di `.env` dengan hasil `openssl rand -base64 48`. Service menolak start kalau nilainya masih contoh. `keys:dev` membuat keypair ES256 di `infra/keys/dev`. Private key-nya diabaikan git, dan lingkungan selain dev memakai kunci dari SOPS.
@@ -72,7 +83,10 @@ bunx turbo run typecheck
 bunx oxlint .
 cd packages/service-kit && bun test --timeout 60000
 cd apps/identity-svc && bun test --timeout 60000
+bun run test:e2e
 ```
+
+CI (`.github/workflows/ci.yml`) menjalankan semua itu, ditambah pengecekan file hasil generate dan kompatibilitas kontrak (skema event BACKWARD, oasdiff) terhadap base.
 
 Test identity-svc membuat database baru di setiap run dan menghapusnya setelah selesai.
 
