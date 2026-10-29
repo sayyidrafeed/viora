@@ -1,8 +1,97 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "categories": { "correctness": "error", "suspicious": "warn" },
-  "rules": {
-    "no-restricted-imports": ["error", { "patterns": [{ "group": ["**/apps/*-svc/**", "@viora/*-svc"], "message": "Service tidak boleh mengimpor kode service lain. Pakai packages/*." }] }]
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
   },
-  "ignorePatterns": ["node_modules", "docs"]
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "hono",
+            "importNames": [
+              "Hono"
+            ],
+            "message": "Buat app dan router lewat createApp/createRouter dari @viora/service-kit (\u00a713)."
+          }
+        ],
+        "patterns": [
+          {
+            "group": [
+              "**/apps/*-svc/**",
+              "@viora/*-svc"
+            ],
+            "message": "Service tidak boleh mengimpor kode service lain. Pakai packages/*."
+          },
+          {
+            "group": [
+              "**/modules/*/*",
+              "!**/modules/*/index.ts"
+            ],
+            "message": "Impor modul hanya lewat index.ts-nya (\u00a713)."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "apps/*/src/modules/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "hono",
+                "importNames": [
+                  "Hono"
+                ],
+                "message": "Buat app dan router lewat createApp/createRouter dari @viora/service-kit (\u00a713)."
+              }
+            ],
+            "patterns": [
+              {
+                "group": [
+                  "**/apps/*-svc/**",
+                  "@viora/*-svc"
+                ],
+                "message": "Service tidak boleh mengimpor kode service lain. Pakai packages/*."
+              },
+              {
+                "group": [
+                  "**/modules/*/*",
+                  "!**/modules/*/index.ts"
+                ],
+                "message": "Impor modul hanya lewat index.ts-nya (\u00a713)."
+              },
+              {
+                "group": [
+                  "../*/*",
+                  "!../*/index.ts"
+                ],
+                "message": "Modul lain hanya boleh diimpor lewat index.ts-nya (\u00a713)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "packages/service-kit/src/app.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "docs"
+  ]
 }
