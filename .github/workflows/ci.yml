@@ -1,0 +1,69 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: lint, typecheck, kontrak
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - run: bunx oxlint .
+      - run: bunx turbo run typecheck
+      - name: file hasil generate sesuai sumbernya
+        run: tools/ci/check-generated.sh
+      - name: kompatibilitas skema event dan OpenAPI terhadap base
+        run: tools/ci/check-compat.sh ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+      - name: test tanpa infra
+        run: |
+          (cd packages/contracts && bun test)
+          (cd packages/service-kit && bun test test/internal.test.ts)
+
+  integration:
+    name: test integrasi dan e2e
+    runs-on: ubuntu-latest
+    needs: static
+    env:
+      WEB_HOST: 0.0.0.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: kunci JWT khusus run ini dan kong.yaml yang memuatnya
+        run: |
+          (cd apps/identity-svc && bun run keys:dev ci && cp .env.example .env)
+          sed -i "s|^AUTH_SECRET=.*|AUTH_SECRET=$(openssl rand -base64 48 | tr -d '\n/+=')|; s|^JWT_ACTIVE_KID=.*|JWT_ACTIVE_KID=ci|" apps/identity-svc/.env
+          bun run kong:config
+      - name: infra (profile core + Tempo)
+        run: |
+          docker compose -f infra/compose/compose.yaml --profile core up -d --wait
+          docker compose -f infra/compose/compose.yaml --profile obs up -d tempo
+      - name: migrasi dan topic
+        run: |
+          (cd apps/identity-svc && bun run db:migrate)
+          docker exec viora-redpanda-1 rpk topic create identity.v1 -p 3
+      - run: cd packages/service-kit && bun test --timeout 60000
+      - run: cd apps/identity-svc && bun test --timeout 60000
+      - run: cd spikes/kafka-bun && bun test --timeout 120000
+      - run: bun run test:e2e
+      - name: log infra saat gagal
+        if: failure()
+        run: docker compose -f infra/compose/compose.yaml --profile core --profile obs logs --tail 200

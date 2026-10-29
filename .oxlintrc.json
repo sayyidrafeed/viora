@@ -92,6 +92,8 @@
   ],
   "ignorePatterns": [
     "node_modules",
-    "docs"
+    "docs",
+    "packages/api-client/src/generated",
+    "**/routeTree.gen.ts"
   ]
 }
