@@ -26,7 +26,7 @@ Seapedia, proyek microservice user sebelumnya, punya 4 service Hono di satu host
 - Risiko yang diterima: pengalaman microservice dari Seapedia belum memenuhi pengecualian "tim sudah berpengalaman" dari Fowler untuk 12 service di k3s.
 - Setiap schema yang mempublikasikan event butuh tabel `outbox`, dan setiap schema yang meng-consume event butuh `processed_events` (§7).
 - Kepemilikan tabel dan topic dicatat di `docs/architecture/owners.md`.
-- Status M0: hanya `identity-svc` yang jalan. Sepuluh service lain masih skeleton. Role database per service belum dibuat (§18A, "Belum dikerjakan di M0"). PgBouncer lokal di `infra/pgbouncer/pgbouncer.ini` masih memakai satu pool bersama (`default_pool_size = 20`, `max_db_connections = 80`).
+- Status per grand plan revisi 18 (2026-10-29): hanya `identity-svc` yang jalan; sepuluh service lain masih skeleton. `tools/db-bootstrap.ts` membuat role `<schema>_svc` per service yang memiliki schema-nya sendiri, tanpa hak di schema lain atau `public` (dibuktikan `tools/db-bootstrap.test.ts`). PgBouncer membuat pool per role dengan `max_user_connections` 10. Role punya hak `CREATE` di database karena migrator Drizzle selalu menjalankan `CREATE SCHEMA IF NOT EXISTS`; semua schema service dibuat lebih dulu oleh bootstrap, jadi role tidak bisa merebut schema service lain.
 
 ## Alternatif yang ditolak
 

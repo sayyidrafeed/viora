@@ -4,7 +4,7 @@ Viora adalah platform video ala YouTube yang dibangun sebagai portofolio system 
 
 Status: disetujui sebagai rencana. M0 selesai 2026-10-29 di repo [sayyidrafeed/viora](https://github.com/sayyidrafeed/viora) (lihat §18A, Penyelesaian M0). Belum ada infrastruktur server.
 
-Revisi 1 sampai 17 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 17 berisi hasil spike M0, identity-svc, hardening setelah code review, dan penyelesaian M0. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
+Revisi 1 sampai 18 tercatat di bagian 20. Revisi 6 sampai 13 berasal dari delapan ronde review independen yang mengunci kontrak event, pipeline metrics, autentikasi, dan journey end-to-end. Revisi 14 sampai 18 berisi hasil spike M0, identity-svc, hardening setelah code review, penyelesaian M0, dan tindak lanjutnya. Kalau ada teks yang bertentangan, revisi yang lebih baru yang berlaku.
 
 ## Daftar isi
 
@@ -1289,7 +1289,7 @@ Deliverable lain yang selesai di revisi 17:
 - Producer `@platformatic/kafka` memaksa `maxInflights = 1` saat `idempotent: true`, jadi syarat §6 `max.in.flight ≤ 5` terpenuhi tanpa konfigurasi tambahan.
 - `packages/design-tokens` dan `apps/mobile` ditunda ke M6. Layout §13 mencantumkannya, tapi aturan "package baru butuh dua consumer nyata" belum terpenuhi sebelum mobile ada.
 
-Tetap terbuka setelah M0: penyedia email (ADR 025, dev masih menulis email ke log), role database per service, `dlq:replay` dan `dlq:skip`, `LISTEN/NOTIFY` relay, VictoriaLogs dan vmagent, pemilihan lane CI per diff, Playwright, login Google, dan arah desain UI.
+Tetap terbuka setelah M0: penyedia email (ADR 025, dev masih menulis email ke log), `dlq:replay` dan `dlq:skip`, `LISTEN/NOTIFY` relay, VictoriaLogs dan vmagent, pemilihan lane CI per diff, Playwright, dan login Google. Role database per service dan arah desain UI selesai di revisi 18.
 
 Perkiraan confidence setelah spike M0: sekitar 7,5/10. Desain tidak berubah kecuali partitioner dan validasi `data`. Sisa jalan ke 8/10 adalah spike M1.
 
@@ -1582,3 +1582,15 @@ Sumber: penyelesaian M0 (lihat §18A, Penyelesaian M0).
 | Query string dibuang dari atribut `url.full` span HTTP | Link verifikasi email dan reset password membawa token di query |
 | `design-tokens` dan `apps/mobile` ditunda ke M6 | Aturan dua consumer nyata |
 | PgBouncer, OTel, profile `obs`, token service, dan klien internal masuk M0, bukan M1 seperti yang ditulis revisi 16 | Exit criteria trace di Tempo dan deliverable `service-kit` M0 |
+
+### Revisi 18, 2026-10-29
+
+Sumber: tindak lanjut M0 dari pemilik proyek.
+
+| Perubahan | Alasan |
+|---|---|
+| Role Postgres per service (`<schema>_svc`) lewat `bun run db:bootstrap`, pool PgBouncer per role (`max_user_connections` 10), `idle_in_transaction_session_timeout` 30 detik per role | §6 meminta role dan pool per service. Timeout menjaga xmin global supaya relay outbox tidak tertahan (§18A) |
+| Riwayat migrasi Drizzle per schema (`<schema>.__drizzle_migrations`) | Satu tabel bersama di schema `drizzle` membuat migrasi service kedua terlewat, karena migrator hanya menjalankan migrasi yang lebih baru dari entri terakhir di tabel itu |
+| Node 26 LTS (26.13.0) di `.node-version` dan CI (`actions/setup-node@v7`), `actions/checkout@v7` | Node 26 menjadi LTS 2026-10-28. Peringatan Node 20 di CI hilang. Runtime action GitHub sendiri masih `node24` |
+| `DESIGN.md` dari arah "apple-design" pilihan pemilik: token warna, tipografi dengan tracking per ukuran, material untuk chrome, umpan balik saat ditekan, spring hanya untuk elemen yang bisa dipegang, dukungan reduced motion, reduced transparency, dan high contrast | UI M0 sebelumnya berstatus "draft without direction" |
+| Alasan penolakan alternatif di ADR 002, 003, 005, 008, dan 021 ditulis technical architect atas delegasi pemilik | Grand plan sebelumnya tidak mencatat alasannya |

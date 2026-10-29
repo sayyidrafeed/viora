@@ -21,7 +21,7 @@ Milestone M0 (fondasi) selesai. Yang ada di repo:
 | Gateway dan observability | `kong.yaml` di-generate dari spec OpenAPI, trace OTel dari Kong sampai service di Tempo | `e2e/auth-via-kong.test.ts` |
 | `spikes/` | `@platformatic/kafka` di Bun, keyring Better Auth + plugin `jwt` Kong 3.9 | `spikes/*/` |
 
-Hasil spike, temuan yang mengubah rencana, dan hal yang belum dibuktikan dicatat di §18A grand plan. Konvensi kode untuk manusia maupun agent ada di [AGENTS.md](AGENTS.md), dan kepemilikan data per service ada di [docs/architecture/owners.md](docs/architecture/owners.md). Yang belum ada: `apps/mobile`, semua service selain identity, dan arah desain (`DESIGN.md`) untuk UI.
+Hasil spike, temuan yang mengubah rencana, dan hal yang belum dibuktikan dicatat di §18A grand plan. Konvensi kode untuk manusia maupun agent ada di [AGENTS.md](AGENTS.md), dan kepemilikan data per service ada di [docs/architecture/owners.md](docs/architecture/owners.md). Yang belum ada: `apps/mobile` dan semua service selain identity. Arah desain UI ada di [DESIGN.md](DESIGN.md).
 
 ## Stack
 
@@ -44,7 +44,7 @@ docs/        grand plan, verifikasi klaim, flow lo-fi, diagram
 
 ## Menjalankan lokal
 
-Butuh Bun 1.4.4 dan Docker. Semua port host digeser +10000 dari default supaya tidak bentrok dengan proyek lain: Postgres 15432, PgBouncer 16432, Redis 16379, Redpanda 19092, Kong 18000 (proxy) dan 18001 (admin), service 13001 sampai 13011.
+Butuh Bun 1.4.4, Node 26 LTS (`.node-version`, dipakai bin tooling seperti Vite dan hey-api), dan Docker. Semua port host digeser +10000 dari default supaya tidak bentrok dengan proyek lain: Postgres 15432, PgBouncer 16432, Redis 16379, Redpanda 19092, Kong 18000 (proxy) dan 18001 (admin), service 13001 sampai 13011.
 
 ```bash
 bun install
@@ -56,6 +56,7 @@ Web dan API dibuka lewat Kong di http://localhost:18000, Grafana di http://local
 Menyiapkan identity-svc:
 
 ```bash
+bun run db:bootstrap
 cd apps/identity-svc
 cp .env.example .env
 bun run keys:dev
@@ -70,7 +71,7 @@ Menyalakan web (di terminal lain):
 cd apps/web && bun run dev
 ```
 
-App memakai `DATABASE_URL` lewat PgBouncer, sedangkan relay outbox dan migrasi memakai `DATABASE_DIRECT_URL` langsung ke Postgres. Isi `AUTH_SECRET` di `.env` dengan hasil `openssl rand -base64 48`. Service menolak start kalau nilainya masih contoh. `keys:dev` membuat keypair ES256 di `infra/keys/dev`. Private key-nya diabaikan git, dan lingkungan selain dev memakai kunci dari SOPS.
+`db:bootstrap` membuat role dan schema per service; identity-svc login sebagai `identity_svc` yang hanya memiliki schema `identity`. App memakai `DATABASE_URL` lewat PgBouncer, sedangkan relay outbox dan migrasi memakai `DATABASE_DIRECT_URL` langsung ke Postgres. Isi `AUTH_SECRET` di `.env` dengan hasil `openssl rand -base64 48`. Service menolak start kalau nilainya masih contoh. `keys:dev` membuat keypair ES256 di `infra/keys/dev`. Private key-nya diabaikan git, dan lingkungan selain dev memakai kunci dari SOPS.
 
 Selama penyedia email belum dipilih, email verifikasi dan reset password ditulis ke log service.
 
